@@ -18,20 +18,25 @@
 
     <header>
         <div id="brand-logo">Aethesi Protocol</div>
+        <div id="sublimated-macro-container">
+            <span id="macro-value"></span>
+            <span id="macro-unit"></span>
+            <span id="target-date-display"></span>
+        </div>
         <div id="realtime-clock"></div>
     </header>
 
     <main id="command-center">
         <div id="display-area">
             <div id="timer-display">
-                <!-- Dedicated container for the ripple effect -->
                 <div id="ripple-effect-container"></div>
-                <span id="time-value" data-old-value=""></span>
+                <div id="time-value" data-old-value=""></div> 
                 <span id="time-unit"></span>
             </div>
             <div id="mission-prompt">Start your mission now!</div>
+            <div id="flow-quote-display"></div>
+            <div id="adrenaline-prompt">There is no time to waste.</div>
         </div>
-        <div id="target-date-display"></div>
     </main>
 
     <div class="mode-switch">
@@ -44,14 +49,27 @@
         <div class="switch-slider"></div>
     </div>
 
+    <div id="sprint-setup">
+        <h4 id="sprint-prompt">Start a Sprint!</h4>
+        <div class="sprint-input-group">
+            <input type="number" id="sprint-duration-input" placeholder="MIN" min="1" max="180">
+            <button id="launch-sprint-button">LAUNCH</button>
+        </div>
+    </div>
+
+    <div id="sprint-controls">
+        <button id="cancel-sprint-button">Cancel [ESC]</button>
+        <button id="complete-sprint-button">Mark as Complete [SHIFT+F]</button>
+    </div>
+
+
     <div id="fullscreen-toggle" title="Toggle Fullscreen">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path class="enter-fullscreen" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 2h-2v3h-3v2h5v-5zm-3-2V5h-2v2h-3v2h5z"/>
             <path class="exit-fullscreen" d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
         </svg>
     </div>
-
-    <!-- The link to the core engine, to be forged last -->
     <script src="script.js"></script>
 </body>
 </html>
+
