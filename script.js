@@ -5,10 +5,10 @@
 const targetDate = new Date('2028-05-21T00:00:00+01:00');
 
 // --- Audio Arsenal ---
-const pulseAudio = new Audio('pulse.ogg');
-const strategicRippleAudio = new Audio('swoosh_ut.ogg');
-const tacticalRippleAudio = new Audio('shockwave.ogg');
-const sprintStartAudio = new Audio('line_blast1.ogg');
+const pulseAudio = new Audio('Pulse.ogg');
+const strategicRippleAudio = new Audio('Swoosh_ut.ogg');
+const tacticalRippleAudio = new Audio('Shockwave.ogg');
+const sprintStartAudio = new Audio('Line_blast1.ogg');
 const adrenalineStartAudio = new Audio('fx-dramatic-cinematic-boom-sound-effect-249258.mp3');
 
 [pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio].forEach(audio => audio.volume = 1.0);
@@ -366,3 +366,4 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.log('Aethesi ServiceWorker registration failed: ', err));
     });
 }
+
