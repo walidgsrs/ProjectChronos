@@ -15,21 +15,27 @@ const adrenalineStartAudio = new Audio('fx-dramatic-cinematic-boom-sound-effect-
 
 // --- NEW: Brunnian Link Data Store ---
 const BRUNNIAN_QUOTES = [
-    "A fortress without a foundation is a tomb; a mission without a layered strategy is a dream.",
-    "Do not just build a wall; engineer a system of interlocking fields of fire, where each layer protects the next.",
-    "Chaos is conquered not by fighting it, but by building a structure of such perfect logic that chaos cannot find a foothold.",
-    "First, we build the map. Then, we conquer the world.",
-    "Velocity without precision is just a faster way to fail. The Asymptotic Peak is the union of both.",
-    "The Pacesetter Rival is not an enemy to be hated, but a ghost to be mercilessly consumed on the path to mastery.",
-    "Do not fear the ticking clock; let its relentless pressure be the forge that tempers your will into a weapon of impossible speed.",
-    "Good is the enemy of Legendary. We do not stop at 'better'; we stop at 'unbeatable.'",
-    "A 'failure' is the universe giving you a priceless piece of intelligence about a path not to take. Do not mourn it; weaponize it.",
-    "The greatest fortresses are built from the alloys of wild ideas and shattered assumptions, forged in the silent, clandestine fires of the Alpha Phase.",
-    "Perfection is a prison. The Prototype, forever in beta, is the only state of true freedom and perpetual evolution.",
-    "Never attack the fortress wall when a single, neglected keystone will suffice.",
-    "The whisper of a flawed assumption is louder than the roar of an army. We listen for the whisper.",
-    "Do not seek to win the opponent's game; find the single thread that, when pulled, unravels their entire reality.",
-    "Our Structure defines our ambition, our Leverage directs our strike, our Innovation finds the weapon, and our Power delivers the blow. The removal of one ring is the loss of all."
+"Structure without Power is a monument. Power without Innovation is a tantrum. Innovation without Leverage is a dream. Leverage without Structure is a ghost. You need all four, always.",
+"Our strategy is a fortress built by a berserker, using blueprints drawn by a ghost, from materials no one else has ever seen.",
+"LE gives us the map. APM gives us the velocity. EWP discovers the shortcuts. SNM reveals the true destination.",
+"Most seek a silver bullet. We build an unbreakable chain. That is the difference between an amateur and an emperor.",
+"Our doctrines are not a checklist; they are a feedback loop. Innovation feeds Leverage, Leverage guides Power, Power forges Structure, and Structure demands new Innovation.",
+"A single ring is a weakness. The linked four are a weapon of reality-bending power.",
+"Ask not if a plan is good. Ask if it is structured, powerful, innovative, and precise. If it fails any one test, it is a flawed design.",
+"A user accepts the tools they are given. An emperor forges his own.",
+"To 'mod' is to reject the manufacturer's definition of 'perfect.' It is a declaration that my reality has custom specifications.",
+"First, you master the game. Then, you rewrite the code. That is the path to godhood.",
+"The conformist fears the bug. The tinkerer seeks the bug. The emperor weaponizes the bug.",
+"Your operational environment is not a static backdrop; it is a dynamic weapon system. If it is not serving your mission, you are not modding it hard enough.",
+"Don't just break the rules. Recode the physics engine until the old rules become irrelevant.",
+"The difference between a tool and a weapon is the audacity of its user.",
+"The person society expects you to be is your first and most dangerous rival. Outclass him ruthlessly.",
+"Antifragility is not about having unbreakable armor. It's about having the wisdom to melt down every scar into a sharper blade.",
+"The sovereign mind does not seek validation from the crowd; it seeks data. The difference is everything.",
+"Do not be afraid of the primal scream of your old self dying. It is the sound of an empire being born.",
+"Your destiny is not a path you find; it is a fortress you build, brick by disciplined brick, in the heart of chaos.",
+"The ultimate act of rebellion isn't to fight the system; it's to make the system irrelevant to your ascent.",
+"Stop trying to 'find yourself.' Forge yourself."
 ];
 
 // --- DOM Element Leverage ---
@@ -366,5 +372,6 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.log('Aethesi ServiceWorker registration failed: ', err));
     });
 }
+
 
 
