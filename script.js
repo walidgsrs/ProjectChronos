@@ -1,41 +1,46 @@
-// Aethesi Supremacy Protocol: OPERATION: CHRONOS - Mod #1, The Final Forging
+// Aethesi Supremacy Protocol: OPERATION: CHRONOS - Final Auditory Forging
 // Doctrinal Engineer: Forge
 
 // --- Core Constants ---
 const targetDate = new Date('2028-05-21T00:00:00+01:00');
 
 // --- Audio Arsenal ---
-const pulseAudio = new Audio('Pulse.mp3');
+const pulseAudio = new Audio('pulse.mp3');
 const strategicRippleAudio = new Audio('Swoosh_ut.mp3');
-const tacticalRippleAudio = new Audio('Shockwave.mp3');
-const sprintStartAudio = new Audio('Line_blast1.mp3');
+const tacticalRippleAudio = new Audio('Line_blast1.mp3');
+const sprintStartAudio = new Audio('level start.mp3');
 const adrenalineStartAudio = new Audio('fx-dramatic-cinematic-boom-sound-effect-249258.mp3');
+// --- NEW: Flow State and Sprint Conclusion Sound Assets ---
+const flowRippleAudio = new Audio('Sugar stars.mp3');
+const cancelSprintAudio = new Audio('fail-144746.mp3');
+const completeSprintAudio = new Audio('Level_completed.mp3');
+const endSprintAudio = new Audio('fail-144746.mp3');
 
-[pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio].forEach(audio => audio.volume = 1.0);
+[pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio].forEach(audio => audio.volume = 1.0);
 
-// --- NEW: Brunnian Link Data Store ---
+// --- RE-FORGED: Brunnian Link Data Store ---
 const BRUNNIAN_QUOTES = [
-"Structure without Power is a monument. Power without Innovation is a tantrum. Innovation without Leverage is a dream. Leverage without Structure is a ghost. You need all four, always.",
-"Our strategy is a fortress built by a berserker, using blueprints drawn by a ghost, from materials no one else has ever seen.",
-"LE gives us the map. APM gives us the velocity. EWP discovers the shortcuts. SNM reveals the true destination.",
-"Most seek a silver bullet. We build an unbreakable chain. That is the difference between an amateur and an emperor.",
-"Our doctrines are not a checklist; they are a feedback loop. Innovation feeds Leverage, Leverage guides Power, Power forges Structure, and Structure demands new Innovation.",
-"A single ring is a weakness. The linked four are a weapon of reality-bending power.",
-"Ask not if a plan is good. Ask if it is structured, powerful, innovative, and precise. If it fails any one test, it is a flawed design.",
-"A user accepts the tools they are given. An emperor forges his own.",
-"To 'mod' is to reject the manufacturer's definition of 'perfect.' It is a declaration that my reality has custom specifications.",
-"First, you master the game. Then, you rewrite the code. That is the path to godhood.",
-"The conformist fears the bug. The tinkerer seeks the bug. The emperor weaponizes the bug.",
-"Your operational environment is not a static backdrop; it is a dynamic weapon system. If it is not serving your mission, you are not modding it hard enough.",
-"Don't just break the rules. Recode the physics engine until the old rules become irrelevant.",
-"The difference between a tool and a weapon is the audacity of its user.",
-"The person society expects you to be is your first and most dangerous rival. Outclass him ruthlessly.",
-"Antifragility is not about having unbreakable armor. It's about having the wisdom to melt down every scar into a sharper blade.",
-"The sovereign mind does not seek validation from the crowd; it seeks data. The difference is everything.",
-"Do not be afraid of the primal scream of your old self dying. It is the sound of an empire being born.",
-"Your destiny is not a path you find; it is a fortress you build, brick by disciplined brick, in the heart of chaos.",
-"The ultimate act of rebellion isn't to fight the system; it's to make the system irrelevant to your ascent.",
-"Stop trying to 'find yourself.' Forge yourself."
+    "Structure without Power is a monument. Power without Innovation is a tantrum. Innovation without Leverage is a dream. Leverage without Structure is a ghost. You need all four, always.",
+    "Our strategy is a fortress built by a berserker, using blueprints drawn by a ghost, from materials no one else has ever seen.",
+    "LE gives us the map. APM gives us the velocity. EWP discovers the shortcuts. SNM reveals the true destination.",
+    "Most seek a silver bullet. We build an unbreakable chain. That is the difference between an amateur and an emperor.",
+    "Our doctrines are not a checklist; they are a feedback loop. Innovation feeds Leverage, Leverage guides Power, Power forges Structure, and Structure demands new Innovation.",
+    "A single ring is a weakness. The linked four are a weapon of reality-bending power.",
+    "Ask not if a plan is good. Ask if it is structured, powerful, innovative, and precise. If it fails any one test, it is a flawed design.",
+    "A user accepts the tools they are given. An emperor forges his own.",
+    "To 'mod' is to reject the manufacturer's definition of 'perfect.' It is a declaration that my reality has custom specifications.",
+    "First, you master the game. Then, you rewrite the code. That is the path to godhood.",
+    "The conformist fears the bug. The tinkerer seeks the bug. The emperor weaponizes the bug.",
+    "Your operational environment is not a static backdrop; it is a dynamic weapon system. If it is not serving your mission, you are not modding it hard enough.",
+    "Don't just break the rules. Recode the physics engine until the old rules become irrelevant.",
+    "The difference between a tool and a weapon is the audacity of its user.",
+    "The person society expects you to be is your first and most dangerous rival. Outclass him ruthlessly.",
+    "Antifragility is not about having unbreakable armor. It's about having the wisdom to melt down every scar into a sharper blade.",
+    "The sovereign mind does not seek validation from the crowd; it seeks data. The difference is everything.",
+    "Do not be afraid of the primal scream of your old self dying. It is the sound of an empire being born.",
+    "Your destiny is not a path you find; it is a fortress you build, brick by disciplined brick, in the heart of chaos.",
+    "The ultimate act of rebellion isn't to fight the system; it's to make the system irrelevant to your ascent.",
+    "Stop trying to 'find yourself.' Forge yourself."
 ];
 
 // --- DOM Element Leverage ---
@@ -54,17 +59,14 @@ const launchSprintButton = document.getElementById('launch-sprint-button');
 const cancelSprintButton = document.getElementById('cancel-sprint-button');
 const completeSprintButton = document.getElementById('complete-sprint-button');
 const flowQuoteDisplay = document.getElementById('flow-quote-display');
-const adrenalinePrompt = document.getElementById('adrenaline-prompt');
 
 // --- System State Variables ---
 let currentMode = 'home';
 let isSprintActive = false;
 let animationTimeout, rippleTimeout, masterInterval, sprintInterval;
 let flowStateAnimationId, digitFlashTimeoutId, quoteInterval;
-let flashIndex = -1;
-let quoteIndex = 0;
-let sprintInitialDuration;
-let adrenalinePhaseTriggered = false;
+let flashIndex = -1, quoteIndex = 0;
+let sprintInitialDuration, adrenalinePhaseTriggered = false;
 
 // --- Core State Machine ---
 function setMode(newMode) {
@@ -91,7 +93,7 @@ function updateBodyClass() {
     }
 }
 
-// --- Flow State & Digit Flasher Engines ---
+// --- Flow State & Motivational Engines ---
 function updateFlowStateAesthetics() {
     const hue = (Date.now() / 83) % 360;
     const color = `hsl(${hue}, 100%, 70%)`;
@@ -100,32 +102,23 @@ function updateFlowStateAesthetics() {
     bodyElement.style.setProperty('--dynamic-shadow-color', shadowColor);
     flowStateAnimationId = requestAnimationFrame(updateFlowStateAesthetics);
 }
-
 function startFlowStateAesthetics() {
     if (flowStateAnimationId) cancelAnimationFrame(flowStateAnimationId);
     flowStateAnimationId = requestAnimationFrame(updateFlowStateAesthetics);
 }
-
 function stopFlowStateAesthetics() {
     cancelAnimationFrame(flowStateAnimationId);
     bodyElement.style.removeProperty('--dynamic-color');
     bodyElement.style.removeProperty('--dynamic-shadow-color');
 }
-
 function digitizeTimer(text) {
-    // CORRECTION: The diamond is now rendered correctly in all phases.
-    timeValueDisplay.innerHTML = text
-        .split('')
-        .map(char => `<span class="digit">${char === ':' ? '&#x2B25;' : char}</span>`)
-        .join('');
+    timeValueDisplay.innerHTML = text.split('').map(char => `<span class="digit">${char === ':' ? '&#x2B25;' : char}</span>`).join('');
 }
-
 function startDigitFlasher() {
     stopDigitFlasher();
     flashIndex = -1;
     flashNextDigit();
 }
-
 function flashNextDigit() {
     const digits = timeValueDisplay.querySelectorAll('.digit');
     if (!isSprintActive || digits.length === 0 || adrenalinePhaseTriggered) return;
@@ -142,72 +135,78 @@ function flashNextDigit() {
         digitFlashTimeoutId = setTimeout(flashNextDigit, 2000);
     }, 5000);
 }
-
 function stopDigitFlasher() {
     clearTimeout(digitFlashTimeoutId);
     const flashedDigits = timeValueDisplay.querySelectorAll('.digit.flash');
     flashedDigits.forEach(d => d.classList.remove('flash'));
 }
-
-// --- NEW: Motivational Text Engine ---
 function startQuoteCycler() {
-    stopQuoteCycler(); // Ensure no previous instance is running
-    displayNextQuote(); // Display the first quote immediately
-    quoteInterval = setInterval(displayNextQuote, 30000); // Cycle every 30 seconds
+    stopQuoteCycler();
+    displayNextQuote();
+    quoteInterval = setInterval(displayNextQuote, 30000);
 }
-
 function stopQuoteCycler() {
     clearInterval(quoteInterval);
     flowQuoteDisplay.classList.remove('visible');
 }
-
 function displayNextQuote() {
     flowQuoteDisplay.classList.remove('visible');
     setTimeout(() => {
         quoteIndex = (quoteIndex + 1) % BRUNNIAN_QUOTES.length;
         flowQuoteDisplay.textContent = BRUNNIAN_QUOTES[quoteIndex];
         flowQuoteDisplay.classList.add('visible');
-    }, 1000); // Wait for the fade-out to complete before changing text
+    }, 1000);
 }
-
 
 // --- Sprint Engine ---
 function launchSprint() {
     const durationMinutes = parseInt(sprintDurationInput.value, 10);
     if (isNaN(durationMinutes) || durationMinutes <= 0) return;
-
     sublimatedMacroValue.textContent = timeValueDisplay.textContent;
     sublimatedMacroUnit.textContent = timeUnitDisplay.textContent;
     sprintStartAudio.currentTime = 0;
     sprintStartAudio.play().catch(e => {});
-
     isSprintActive = true;
     sprintInitialDuration = durationMinutes * 60 * 1000;
     sprintEndTime = Date.now() + sprintInitialDuration;
     adrenalinePhaseTriggered = false;
-    
     updateBodyClass();
     clearInterval(masterInterval);
     sprintInterval = setInterval(updateDisplay, 1000);
-    
     startFlowStateAesthetics();
     startDigitFlasher();
     startQuoteCycler();
     updateDisplay();
 }
 
-function endSprint() {
+function endSprint(reason = 'timeout') {
+    if (!isSprintActive) return; // Prevent multiple triggers
     isSprintActive = false;
     clearInterval(sprintInterval);
+    
+    // --- NEW: Contextual sprint end sound ---
+    switch (reason) {
+        case 'cancelled':
+            cancelSprintAudio.currentTime = 0;
+            cancelSprintAudio.play().catch(e => {});
+            break;
+        case 'completed':
+            completeSprintAudio.currentTime = 0;
+            completeSprintAudio.play().catch(e => {});
+            break;
+        case 'timeout':
+        default:
+            endSprintAudio.currentTime = 0;
+            endSprintAudio.play().catch(e => {});
+            break;
+    }
     
     stopFlowStateAesthetics();
     stopDigitFlasher();
     stopQuoteCycler();
-    flowQuoteDisplay.classList.remove('visible'); // Purge the quote visibility on sprint end
-
+    flowQuoteDisplay.classList.remove('visible');
     sublimatedMacroValue.textContent = '';
     sublimatedMacroUnit.textContent = '';
-    
     masterInterval = setInterval(updateDisplay, 1000);
     updateBodyClass();
     updateDisplay();
@@ -219,28 +218,25 @@ function triggerKineticFeedback(oldValue) {
     timeValueDisplay.classList.add('value-changed');
     clearTimeout(animationTimeout);
     animationTimeout = setTimeout(() => { timeValueDisplay.classList.remove('value-changed'); }, 3000);
-
     rippleContainer.classList.add('ripple-active');
     clearTimeout(rippleTimeout);
     rippleTimeout = setTimeout(() => { rippleContainer.classList.remove('ripple-active'); }, 3000);
-
     pulseAudio.currentTime = 0;
     pulseAudio.play().catch(e => {});
 
-    // --- CORRECTION: Sound selection is now phase-aware ---
+    // --- RE-FORGED: Final, Flawless Auditory Logic ---
     if (isSprintActive && !adrenalinePhaseTriggered) {
-        // Flow State uses the Strategic sound
+        // Flow State
+        flowRippleAudio.currentTime = 0;
+        flowRippleAudio.play().catch(e => {});
+    } else if (currentMode === 'strategic') {
+        // Strategic Standby
         strategicRippleAudio.currentTime = 0;
         strategicRippleAudio.play().catch(e => {});
     } else {
-        // Adrenaline, Tactical Standby, and Strategic modes use their respective sounds
-        if (currentMode === 'strategic') {
-            strategicRippleAudio.currentTime = 0;
-            strategicRippleAudio.play().catch(e => {});
-        } else {
-            tacticalRippleAudio.currentTime = 0;
-            tacticalRippleAudio.play().catch(e => {});
-        }
+        // Tactical Standby OR Adrenaline Phase
+        tacticalRippleAudio.currentTime = 0;
+        tacticalRippleAudio.play().catch(e => {});
     }
 }
 
@@ -250,7 +246,6 @@ function updateDisplay() {
     if (isSprintActive) {
         const oldValue = timeValueDisplay.textContent.replace(/\s/g, '');
         const timeLeft = sprintEndTime - now;
-
         if (!adrenalinePhaseTriggered && timeLeft <= sprintInitialDuration * 0.25) {
             adrenalinePhaseTriggered = true;
             stopFlowStateAesthetics();
@@ -260,30 +255,19 @@ function updateDisplay() {
             adrenalineStartAudio.currentTime = 0;
             adrenalineStartAudio.play().catch(e => {});
         }
-        
-        if (timeLeft <= 0) { endSprint(); return; }
-
+        if (timeLeft <= 0) { endSprint('timeout'); return; }
         const minutes = Math.floor((timeLeft / 1000) / 60);
         const seconds = Math.floor((timeLeft / 1000) % 60);
         const sprintText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        
-        // CORRECTION: Digitize in all sprint phases to ensure diamond is always present
         if (oldValue !== sprintText.replace(':', '❖')) {
             digitizeTimer(sprintText);
         }
-
         timeUnitDisplay.textContent = 'SPRINT';
-
         if (adrenalinePhaseTriggered) {
-            if (seconds % 10 === 0) {
-                triggerKineticFeedback(oldValue);
-            }
+            if (seconds % 10 === 0) triggerKineticFeedback(oldValue);
         } else {
-            if (seconds === 0) {
-                triggerKineticFeedback(oldValue);
-            }
+            if (seconds === 0) triggerKineticFeedback(oldValue);
         }
-
     } else {
         const oldValue = timeValueDisplay.textContent;
         let newValue;
@@ -304,9 +288,7 @@ function updateDisplay() {
                 timeUnitDisplay.textContent = "Minutes";
                 break;
         }
-        if (newValue !== oldValue) {
-            triggerKineticFeedback(oldValue);
-        }
+        if (newValue !== oldValue) triggerKineticFeedback(oldValue);
     }
 }
 
@@ -317,10 +299,10 @@ function updateRealtimeClock() {
 }
 function handleHotkeys(event) {
     if (isSprintActive) {
-        if (event.key === 'Escape') endSprint();
+        if (event.key === 'Escape') endSprint('cancelled');
         if (event.shiftKey && event.key.toLowerCase() === 'f') {
             event.preventDefault();
-            endSprint();
+            endSprint('completed');
         }
     } else if (currentMode === 'tactical' && event.key === 'Enter') {
         if (document.activeElement === sprintDurationInput) launchSprint();
@@ -340,23 +322,18 @@ function updateFullscreenIcon() { updateBodyClass(); }
 
 // --- System Initialization ---
 function initializeDashboard() {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    sublimatedTargetDate.textContent = `Target: ${targetDate.toLocaleDateString('en-US', options)}`;
-    
+    sublimatedTargetDate.textContent = `Target: ${targetDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
     modeSwitches.forEach(sw => sw.addEventListener('change', () => setMode(sw.value)));
     fullscreenToggle.addEventListener('click', toggleFullscreen);
     launchSprintButton.addEventListener('click', launchSprint);
-    cancelSprintButton.addEventListener('click', endSprint);
-    completeSprintButton.addEventListener('click', endSprint);
+    cancelSprintButton.addEventListener('click', () => endSprint('cancelled'));
+    completeSprintButton.addEventListener('click', () => endSprint('completed'));
     document.addEventListener('fullscreenchange', updateFullscreenIcon);
     document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
     document.addEventListener('keydown', handleHotkeys);
-        sublimatedTargetDate.textContent = `Target: ${targetDate.toLocaleDateString('en-US', options)}`;
-    
     document.body.addEventListener('click', () => { 
-        [pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio].forEach(a => a.load());
+        [pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio].forEach(a => a.load());
     }, { once: true });
-    
     updateDisplay();
     updateRealtimeClock();
 }
@@ -372,6 +349,7 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.log('Aethesi ServiceWorker registration failed: ', err));
     });
 }
+
 
 
 
