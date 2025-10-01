@@ -30,14 +30,15 @@
     </header>
 
     <main id="command-center">
-        <div id="display-area">
+<div id="display-area">
             <div id="timer-display">
                 <div id="ripple-effect-container"></div>
                 <div id="time-value" data-old-value=""></div> 
                 <span id="time-unit"></span>
             </div>
-            <!-- RE-INTRODUCED: The primary target display for standby modes -->
             <div id="target-date-display"></div>
+            <!-- ADD THIS LINE TO RESTORE THE MISSION PROMPT -->
+            <div id="mission-prompt">Start your mission now!</div>
             <div id="flow-quote-display"></div>
             <div id="adrenaline-prompt">There is no time to waste.</div>
         </div>
@@ -57,7 +58,7 @@
         <h4 id="sprint-prompt">Start a Sprint!</h4>
         <div class="sprint-input-group">
             <input type="number" id="sprint-duration-input" placeholder="MIN" min="1" max="180">
-            <button id="launch-sprint-button">Here goes nothing!</button>
+            <button id="launch-sprint-button">LAUNCH</button>
         </div>
     </div>
 
