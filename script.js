@@ -1,4 +1,4 @@
-// Aethesi Supremacy Protocol: OPERATION: CHRONOS - Final Auditory Forging
+// Aethesi Supremacy Protocol: OPERATION: CHRONOS - The Final Forging (Resilient Core)
 // Doctrinal Engineer: Forge
 
 // --- Core Constants ---
@@ -6,19 +6,18 @@ const targetDate = new Date('2028-05-21T00:00:00+01:00');
 
 // --- Audio Arsenal ---
 const pulseAudio = new Audio('pulse.mp3');
-const strategicRippleAudio = new Audio('Swoosh_ut.mp3');
-const tacticalRippleAudio = new Audio('Line_blast1.mp3');
+const strategicRippleAudio = new Audio('swoosh_ut.mp3');
+const tacticalRippleAudio = new Audio('line_blast1.mp3');
 const sprintStartAudio = new Audio('level start.mp3');
 const adrenalineStartAudio = new Audio('fx-dramatic-cinematic-boom-sound-effect-249258.mp3');
-// --- NEW: Flow State and Sprint Conclusion Sound Assets ---
-const flowRippleAudio = new Audio('Sugar stars.mp3');
+const flowRippleAudio = new Audio('sugar stars.mp3');
 const cancelSprintAudio = new Audio('fail-144746.mp3');
 const completeSprintAudio = new Audio('Level_completed.mp3');
 const endSprintAudio = new Audio('fail-144746.mp3');
 
 [pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio].forEach(audio => audio.volume = 1.0);
 
-// --- RE-FORGED: Brunnian Link Data Store ---
+// --- Brunnian Link Data Store ---
 const BRUNNIAN_QUOTES = [
     "Structure without Power is a monument. Power without Innovation is a tantrum. Innovation without Leverage is a dream. Leverage without Structure is a ghost. You need all four, always.",
     "Our strategy is a fortress built by a berserker, using blueprints drawn by a ghost, from materials no one else has ever seen.",
@@ -59,14 +58,15 @@ const launchSprintButton = document.getElementById('launch-sprint-button');
 const cancelSprintButton = document.getElementById('cancel-sprint-button');
 const completeSprintButton = document.getElementById('complete-sprint-button');
 const flowQuoteDisplay = document.getElementById('flow-quote-display');
+const starfieldContainer = document.getElementById('starfield-container');
 
 // --- System State Variables ---
 let currentMode = 'home';
 let isSprintActive = false;
-let animationTimeout, rippleTimeout, masterInterval, sprintInterval;
+let animationTimeout, rippleTimeout, masterInterval;
 let flowStateAnimationId, digitFlashTimeoutId, quoteInterval;
 let flashIndex = -1, quoteIndex = 0;
-let sprintInitialDuration, adrenalinePhaseTriggered = false;
+let sprintInitialDuration, sprintEndTime, adrenalinePhaseTriggered = false;
 
 // --- Core State Machine ---
 function setMode(newMode) {
@@ -91,6 +91,27 @@ function updateBodyClass() {
             bodyElement.classList.add('flow-state');
         }
     }
+}
+
+// --- INNOVATION: Celestial Starfield Engine ---
+function createStarfield(starCount = 50) {
+    starfieldContainer.innerHTML = '';
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        const size = Math.random() * 2 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.top = `${Math.random() * 60}%`;
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.animationDuration = `${Math.random() * 5 + 3}s`;
+        star.style.animationDelay = `${Math.random() * 5}s`;
+        starfieldContainer.appendChild(star);
+    }
+}
+
+function destroyStarfield() {
+    starfieldContainer.innerHTML = '';
 }
 
 // --- Flow State & Motivational Engines ---
@@ -171,43 +192,30 @@ function launchSprint() {
     sprintEndTime = Date.now() + sprintInitialDuration;
     adrenalinePhaseTriggered = false;
     updateBodyClass();
-    clearInterval(masterInterval);
-    sprintInterval = setInterval(updateDisplay, 1000);
     startFlowStateAesthetics();
     startDigitFlasher();
     startQuoteCycler();
+    createStarfield();
     updateDisplay();
 }
 
 function endSprint(reason = 'timeout') {
-    if (!isSprintActive) return; // Prevent multiple triggers
+    if (!isSprintActive) return;
     isSprintActive = false;
-    clearInterval(sprintInterval);
     
-    // --- NEW: Contextual sprint end sound ---
     switch (reason) {
-        case 'cancelled':
-            cancelSprintAudio.currentTime = 0;
-            cancelSprintAudio.play().catch(e => {});
-            break;
-        case 'completed':
-            completeSprintAudio.currentTime = 0;
-            completeSprintAudio.play().catch(e => {});
-            break;
-        case 'timeout':
-        default:
-            endSprintAudio.currentTime = 0;
-            endSprintAudio.play().catch(e => {});
-            break;
+        case 'cancelled': cancelSprintAudio.currentTime = 0; cancelSprintAudio.play().catch(e => {}); break;
+        case 'completed': completeSprintAudio.currentTime = 0; completeSprintAudio.play().catch(e => {}); break;
+        case 'timeout': default: endSprintAudio.currentTime = 0; endSprintAudio.play().catch(e => {}); break;
     }
     
     stopFlowStateAesthetics();
     stopDigitFlasher();
     stopQuoteCycler();
+    destroyStarfield();
     flowQuoteDisplay.classList.remove('visible');
     sublimatedMacroValue.textContent = '';
     sublimatedMacroUnit.textContent = '';
-    masterInterval = setInterval(updateDisplay, 1000);
     updateBodyClass();
     updateDisplay();
 }
@@ -224,33 +232,32 @@ function triggerKineticFeedback(oldValue) {
     pulseAudio.currentTime = 0;
     pulseAudio.play().catch(e => {});
 
-    // --- RE-FORGED: Final, Flawless Auditory Logic ---
     if (isSprintActive && !adrenalinePhaseTriggered) {
-        // Flow State
         flowRippleAudio.currentTime = 0;
         flowRippleAudio.play().catch(e => {});
     } else if (currentMode === 'strategic') {
-        // Strategic Standby
         strategicRippleAudio.currentTime = 0;
         strategicRippleAudio.play().catch(e => {});
     } else {
-        // Tactical Standby OR Adrenaline Phase
         tacticalRippleAudio.currentTime = 0;
         tacticalRippleAudio.play().catch(e => {});
     }
 }
 
-// --- Unified Display Engine ---
+// --- RE-FORGED: The Resilient, Self-Correcting Chronomatic Engine ---
 function updateDisplay() {
-    const now = Date.now();
+    const now = new Date();
+    const oldValue = timeValueDisplay.textContent.replace(/\s/g, '');
+    let newValue;
+
     if (isSprintActive) {
-        const oldValue = timeValueDisplay.textContent.replace(/\s/g, '');
-        const timeLeft = sprintEndTime - now;
+        const timeLeft = sprintEndTime - now.getTime();
         if (!adrenalinePhaseTriggered && timeLeft <= sprintInitialDuration * 0.25) {
             adrenalinePhaseTriggered = true;
             stopFlowStateAesthetics();
             stopDigitFlasher();
             stopQuoteCycler();
+            destroyStarfield();
             updateBodyClass();
             adrenalineStartAudio.currentTime = 0;
             adrenalineStartAudio.play().catch(e => {});
@@ -258,39 +265,49 @@ function updateDisplay() {
         if (timeLeft <= 0) { endSprint('timeout'); return; }
         const minutes = Math.floor((timeLeft / 1000) / 60);
         const seconds = Math.floor((timeLeft / 1000) % 60);
-        const sprintText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        if (oldValue !== sprintText.replace(':', '❖')) {
-            digitizeTimer(sprintText);
+        newValue = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        if (oldValue !== newValue.replace(':', '❖')) {
+            digitizeTimer(newValue);
         }
         timeUnitDisplay.textContent = 'SPRINT';
+
         if (adrenalinePhaseTriggered) {
-            if (seconds % 10 === 0) triggerKineticFeedback(oldValue);
+            if (seconds % 10 === 0 && (sprintInitialDuration - timeLeft) > 1000) { // Prevents initial trigger
+                triggerKineticFeedback(oldValue);
+            }
         } else {
-            if (seconds === 0) triggerKineticFeedback(oldValue);
+            if (seconds === 59 && (sprintInitialDuration - timeLeft) > 1000) { // Trigger on the changeover
+                triggerKineticFeedback(oldValue);
+            }
         }
     } else {
-        const oldValue = timeValueDisplay.textContent;
-        let newValue;
         switch (currentMode) {
             case 'home':
-                newValue = `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`;
-                timeValueDisplay.innerHTML = newValue;
+                newValue = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                if (oldValue !== newValue) timeValueDisplay.innerHTML = newValue;
                 timeUnitDisplay.textContent = '';
                 break;
             case 'strategic':
-                newValue = Math.floor((targetDate - new Date()) / 36e5).toLocaleString('en-US');
-                timeValueDisplay.innerHTML = newValue;
+                newValue = Math.floor((targetDate - now) / 36e5).toLocaleString('en-US');
+                if (oldValue !== newValue) {
+                    timeValueDisplay.innerHTML = newValue;
+                    triggerKineticFeedback(oldValue);
+                }
                 timeUnitDisplay.textContent = "Hours";
                 break;
             case 'tactical':
-                newValue = Math.floor((targetDate - new Date()) / 6e4).toLocaleString('en-US');
-                timeValueDisplay.innerHTML = newValue;
+                newValue = Math.floor((targetDate - now) / 6e4).toLocaleString('en-US');
+                if (oldValue !== newValue) {
+                    timeValueDisplay.innerHTML = newValue;
+                    triggerKineticFeedback(oldValue);
+                }
                 timeUnitDisplay.textContent = "Minutes";
                 break;
         }
-        if (newValue !== oldValue) triggerKineticFeedback(oldValue);
     }
 }
+
 
 // --- Ancillary Functions ---
 function updateRealtimeClock() {
