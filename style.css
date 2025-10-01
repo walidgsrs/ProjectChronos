@@ -1,6 +1,17 @@
 @import url("https://fonts.cdnfonts.com/css/itc-kabel-std");
 
 /* --- Keyframe Animations --- */
+/* --- NEW: Keyframe for the living Sprint Timer glow --- */
+@keyframes sprint-glow {
+    0%, 100% {
+        /* The base, resting glow */
+        text-shadow: 0 0 2px #fff, 0 0 12px rgba(255, 255, 255, 0.2), 0 0 24px rgba(0,0,0,0.8);
+    }
+    50% {
+        /* The peak, intense glow */
+        text-shadow: 0 0 6px #fff, 0 0 20px #fff, 0 0 40px rgba(255, 255, 255, 0.5);
+    }
+}
 @keyframes color-flash-red {
     50% { color: #ff0033; text-shadow: 0 0 30px #ff0033, 0 0 15px #ff0033; }
 }
@@ -170,6 +181,10 @@ header {
     color: #FFD700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
     opacity: 0; pointer-events: none;
 }
+/* --- NEW: Apply the living glow animation only during an active sprint --- */
+.sprint-active #time-value {
+    animation: sprint-glow 2s ease-in-out infinite;
+}
 #ripple-effect-container {
     position: fixed; top: 50%; left: 50%;
     z-index: 0;
@@ -193,7 +208,26 @@ header {
 }
 
 #time-unit { font-size: clamp(1.5rem, 4vw, 3rem); font-weight: 400; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); }
-#target-date-display { display: none; }
+#target-date-display {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    margin-top: 2rem;
+    opacity: 0; /* Hidden by default */
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Make it visible in Strategic and Tactical Standby modes */
+.strategic-mode #target-date-display,
+.tactical-mode:not(.sprint-active) #target-date-display {
+    opacity: 1;
+}
+
+/* Ensure it fades out gracefully when a sprint starts */
+.sprint-active #target-date-display {
+    opacity: 0;
+}
 
 .home-mode #timer-display .time-unit, .home-mode #realtime-clock { display: none; }
 .strategic-mode #mission-prompt, .tactical-mode #mission-prompt { display: none; }
@@ -311,3 +345,4 @@ body.fullscreen-active .enter-fullscreen { display: none; }
     #timer-display { flex-direction: column; align-items: center; gap: 0.5rem; }
     .mode-switch label { padding: 6px 18px; font-size: 0.8rem; }
 }
+
