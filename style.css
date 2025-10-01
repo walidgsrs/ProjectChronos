@@ -140,25 +140,29 @@ header {
 /* --- RE-FORGED: Unified Contextual Prompt System --- */
 #mission-prompt, #flow-quote-display, #adrenaline-prompt {
     /* Base styles for all prompts */
-    /* The flawed absolute positioning has been purged. */
     width: 90%;
-    max-width: 800px; /* Prevents quotes from becoming too wide on large screens */
+    max-width: 800px;
     padding: 0 2rem;
-    margin-top: 1.5rem; /* Creates a clean, structural separation from the timer */
+    margin-top: 1.5rem;
     font-size: clamp(1rem, 2.5vw, 1.25rem);
     font-weight: 400;
     color: rgba(255, 255, 252, 0.6);
     opacity: 0;
-    pointer-events: none; /* Inactive by default */
-    transition: opacity 1s ease-in-out;
-    visibility: hidden; /* Start as completely hidden */
+    pointer-events: none;
+    /* --- NEW: Collapse/Expand logic for perfect centering --- */
+    transition: opacity 1s ease-in-out, max-height 1s ease-in-out, margin 1s ease-in-out;
+    visibility: hidden;
+    max-height: 0; /* Collapse when hidden */
+    overflow: hidden; /* Hide content during collapse */
 }
+/* --- State-aware visibility and animation triggers --- */
 .home-mode #mission-prompt,
 .flow-state #flow-quote-display.visible,
 .adrenaline-phase #adrenaline-prompt {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+    max-height: 100px; /* Expand to reveal content */
 }
 #mission-prompt { animation: fade-in-out 6s ease-in-out infinite; }
 .adrenaline-phase #adrenaline-prompt {
@@ -345,4 +349,5 @@ body.fullscreen-active .enter-fullscreen { display: none; }
     #timer-display { flex-direction: column; align-items: center; gap: 0.5rem; }
     .mode-switch label { padding: 6px 18px; font-size: 0.8rem; }
 }
+
 
