@@ -1,6 +1,4 @@
-@import url("https://fonts.cdnfonts.com/css/itc-kabel-std");
-
-/* --- Keyframe Animations --- */
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 /* --- NEW: Keyframe for the living Sprint Timer glow --- */
 @keyframes sprint-glow {
     0%, 100% {
@@ -49,7 +47,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    font-family: 'ITC Kabel Std', sans-serif;
+    font-family: 'Barlow Condensed', sans-serif;
     color: #ffffff; background-color: #050507;
     overflow: hidden; display: flex; justify-content: center;
     align-items: center; min-height: 100vh;
@@ -121,7 +119,12 @@ header {
 }
 #brand-logo, #realtime-clock { transition: opacity 0.5s ease; }
 #brand-logo { font-size: 0.9rem; font-weight: 400; color: rgba(255, 255, 255, 0.4); }
-#realtime-clock { font-size: 0.9rem; font-weight: 700; color: rgba(255, 255, 255, 0.3); letter-spacing: 1px; }
+#realtime-clock { 
+    font-size: 0.9rem; 
+    font-weight: 900; /* Calibrated for maximum clarity */
+    color: rgba(255, 255, 255, 0.3); 
+    letter-spacing: 1px; 
+}
 
 #sublimated-macro-container {
     position: absolute; top: 2.5rem; left: 50%;
@@ -172,7 +175,8 @@ header {
 
 #timer-display { position: relative; display: flex; align-items: center; justify-content: center; gap: 1.5rem; }
 #time-value {
-    font-size: clamp(6rem, 18vw, 20rem); font-weight: 700;
+    font-size: clamp(6rem, 18vw, 20rem);
+    font-weight: 900; /* Calibrated for maximum impact */
     line-height: 0.9;
     text-shadow: 0 0 1px rgba(255,255,255,0.8), 0 0 10px rgba(255,255,255,0.1), 0 0 20px rgba(0,0,0,0.8);
     transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
@@ -287,7 +291,7 @@ header {
 #sprint-duration-input {
     background-color: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px; color: #ffffff;
-    font-family: 'ITC Kabel Std', sans-serif; font-weight: 700; font-size: 1rem;
+font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1rem;
     text-align: center; width: 80px; padding: 10px;
     outline: none; transition: all 0.3s ease; -webkit-appearance: none; margin: 0;
 }
@@ -296,7 +300,7 @@ header {
 #launch-sprint-button {
     background-color: #9f1239; border: 1px solid rgba(255, 80, 80, 0.5);
     border-radius: 8px; color: #ffffff;
-    font-family: 'ITC Kabel Std', sans-serif; font-weight: 700; font-size: 1rem;
+font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1rem;
     padding: 10px 20px;
     cursor: pointer; outline: none; transition: background-color 0.3s ease, transform 0.2s ease;
 }
@@ -315,7 +319,7 @@ header {
 #cancel-sprint-button, #complete-sprint-button {
     background-color: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px; color: rgba(255, 255, 255, 0.6);
-    font-family: 'ITC Kabel Std', sans-serif; font-weight: 400; font-size: 0.8rem;
+font-family: 'Barlow Condensed', sans-serif; font-weight: 400; font-size: 0.8rem;
     padding: 8px 16px; cursor: pointer; transition: all 0.3s ease;
 }
 #cancel-sprint-button:hover { color: #ffffff; border-color: #ff4d4d; }
