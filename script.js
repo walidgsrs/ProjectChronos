@@ -5,12 +5,12 @@
 const targetDate = new Date('2028-05-21T00:00:00+01:00');
 
 // --- Audio Arsenal ---
-const pulseAudio = new Audio('Pulse.mp3');
-const strategicRippleAudio = new Audio('Swoosh_ut.mp3');
-const tacticalRippleAudio = new Audio('Line_blast1.mp3');
+const pulseAudio = new Audio('pulse.mp3');
+const strategicRippleAudio = new Audio('swoosh_ut.mp3');
+const tacticalRippleAudio = new Audio('line_blast1.mp3');
 const sprintStartAudio = new Audio('level start.mp3');
 const adrenalineStartAudio = new Audio('fx-dramatic-cinematic-boom-sound-effect-249258.mp3');
-const flowRippleAudio = new Audio('Sugar stars.mp3');
+const flowRippleAudio = new Audio('sugar stars.mp3');
 const cancelSprintAudio = new Audio('fail-144746.mp3');
 const completeSprintAudio = new Audio('Level_completed.mp3');
 const endSprintAudio = new Audio('fail-144746.mp3');
@@ -60,6 +60,12 @@ const cancelSprintButton = document.getElementById('cancel-sprint-button');
 const completeSprintButton = document.getElementById('complete-sprint-button');
 const flowQuoteDisplay = document.getElementById('flow-quote-display');
 const starfieldContainer = document.getElementById('starfield-container');
+const postSprintOverlay = document.getElementById('post-sprint-overlay');
+const postSprintMessage = document.getElementById('post-sprint-message');
+const sprintGoalTracker = document.getElementById('sprint-goal-tracker');
+const sprintGoalInput = document.getElementById('sprint-goal-input');
+const sprintGoalDisplay = document.getElementById('sprint-goal-display');
+const sprintProgressDisplay = document.getElementById('sprint-progress-display');
 
 // --- System State Variables ---
 let currentMode = 'home';
@@ -68,6 +74,8 @@ let animationTimeout, rippleTimeout, masterInterval;
 let flowStateAnimationId, digitFlashTimeoutId, quoteInterval;
 let flashIndex = -1, quoteIndex = 0;
 let sprintInitialDuration, sprintEndTime, adrenalinePhaseTriggered = false;
+let sprintGoal = 0;
+let sprintsCompleted = 0;
 
 // --- Core State Machine ---
 function setMode(newMode) {
@@ -182,6 +190,7 @@ function displayNextQuote() {
 
 // --- Sprint Engine ---
 function launchSprint() {
+    postSprintOverlay.classList.remove('visible'); // Ensure debriefing screen is hidden
     const durationMinutes = parseInt(sprintDurationInput.value, 10);
     if (isNaN(durationMinutes) || durationMinutes <= 0) return;
     sublimatedMacroValue.textContent = timeValueDisplay.textContent;
@@ -202,13 +211,49 @@ function launchSprint() {
 
 function endSprint(reason = 'timeout') {
     if (!isSprintActive) return;
-    isSprintActive = false;
-    
-    switch (reason) {
-        case 'cancelled': cancelSprintAudio.currentTime = 0; cancelSprintAudio.play().catch(e => {}); break;
-        case 'completed': completeSprintAudio.currentTime = 0; completeSprintAudio.play().catch(e => {}); break;
-        case 'timeout': default: endSprintAudio.currentTime = 0; endSprintAudio.play().catch(e => {}); break;
+
+    // --- Performance Ledger Logic ---
+    let progressMessage = '';
+if (reason === 'completed' && sprintInitialDuration >= 20 * 60 * 1000) {
+        sprintsCompleted++;
+        saveStateToStorage();
+        updateGoalDisplay();
+        if (sprintGoal > 0) {
+            const percentage = Math.round((sprintsCompleted / sprintGoal) * 100);
+            progressMessage = `${percentage}% of Daily Goal Complete`;
+        }
     }
+    sprintProgressDisplay.textContent = progressMessage;
+    
+    isSprintActive = false;
+    clearInterval(masterInterval);
+
+    let messageHTML = '';
+    switch (reason) {
+        case 'cancelled':
+            cancelSprintAudio.currentTime = 0;
+            cancelSprintAudio.play().catch(e => {});
+            messageHTML = 'Sprint <span class="glow-purple">Cancelled.</span>';
+            break;
+        case 'completed':
+            completeSprintAudio.currentTime = 0;
+            completeSprintAudio.play().catch(e => {});
+            messageHTML = 'Sprint <span class="glow-green">Complete!</span>';
+            break;
+        case 'timeout':
+        default:
+            endSprintAudio.currentTime = 0;
+            endSprintAudio.play().catch(e => {});
+            messageHTML = "Time's Up. <span class='glow-orange'>Did you finish?</span>";
+            break;
+    }
+
+    postSprintMessage.innerHTML = messageHTML;
+    postSprintOverlay.classList.add('visible');
+
+    setTimeout(() => {
+        postSprintOverlay.classList.remove('visible');
+    }, 4500); // Increased duration for readability
     
     stopFlowStateAesthetics();
     stopDigitFlasher();
@@ -217,10 +262,11 @@ function endSprint(reason = 'timeout') {
     flowQuoteDisplay.classList.remove('visible');
     sublimatedMacroValue.textContent = '';
     sublimatedMacroUnit.textContent = '';
+    
+    masterInterval = setInterval(updateDisplay, 1000);
     updateBodyClass();
     updateDisplay();
 }
-
 // --- Kinetic Feedback Core ---
 function triggerKineticFeedback(oldValue) {
     timeValueDisplay.setAttribute('data-old-value', oldValue);
@@ -337,6 +383,37 @@ function toggleFullscreen() {
     }
 }
 function updateFullscreenIcon() { updateBodyClass(); }
+// --- NEW: Persistence Engine (localStorage) ---
+function saveStateToStorage() {
+    const today = new Date().toLocaleDateString(); // Get YYYY-MM-DD
+    localStorage.setItem('aethesiDashboardState', JSON.stringify({
+        sprintGoal: sprintGoal,
+        sprintsCompleted: sprintsCompleted,
+        lastUpdated: today
+    }));
+}
+
+function loadStateFromStorage() {
+    const state = JSON.parse(localStorage.getItem('aethesiDashboardState'));
+    const today = new Date().toLocaleDateString();
+    
+    if (state) {
+        // If the saved data is not from today, reset the completion count
+        if (state.lastUpdated !== today) {
+            sprintGoal = state.sprintGoal || 0;
+            sprintsCompleted = 0; // Reset for the new day
+        } else {
+            sprintGoal = state.sprintGoal || 0;
+            sprintsCompleted = state.sprintsCompleted || 0;
+        }
+    }
+    updateGoalDisplay();
+}
+
+function updateGoalDisplay() {
+    sprintGoalInput.value = sprintGoal > 0 ? sprintGoal : '';
+    sprintGoalDisplay.textContent = `${sprintsCompleted}/${sprintGoal > 0 ? sprintGoal : '?'}`;
+}
 
 // --- System Initialization ---
 function initializeDashboard() {
@@ -354,6 +431,16 @@ function initializeDashboard() {
     document.body.addEventListener('click', () => { 
         [pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio].forEach(a => a.load());
     }, { once: true });
+    sprintGoalInput.addEventListener('change', () => {
+        sprintGoal = parseInt(sprintGoalInput.value, 10) || 0;
+        updateGoalDisplay();
+        saveStateToStorage();
+    });
+
+    loadStateFromStorage();
+
+    updateDisplay();
+    updateRealtimeClock();
     updateDisplay();
     updateRealtimeClock();
 }
@@ -369,6 +456,7 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.log('Aethesi ServiceWorker registration failed: ', err));
     });
 }
+
 
 
 
