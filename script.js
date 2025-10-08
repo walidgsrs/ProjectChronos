@@ -1,6 +1,5 @@
 // Aethesi Supremacy Protocol: OPERATION: CHRONOS - The Final Forging (Resilient Core)
 // Doctrinal Engineer: Forge
-
 // --- Core Constants ---
 const targetDate = new Date('2028-05-21T00:00:00+01:00');
 
@@ -456,6 +455,7 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.log('Aethesi ServiceWorker registration failed: ', err));
     });
 }
+
 
 
 
