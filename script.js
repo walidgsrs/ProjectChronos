@@ -1,18 +1,19 @@
 // Aethesi Supremacy Protocol: OPERATION: CHRONOS - The Final Forging (Resilient Core)
 // Doctrinal Engineer: Forge
+
 // --- Core Constants ---
 const targetDate = new Date('2028-05-21T00:00:00+01:00');
 
 // --- Audio Arsenal ---
 const pulseAudio = new Audio('Pulse.mp3');
-const strategicRippleAudio = new Audio('Swoosh_ut.mp3');
-const tacticalRippleAudio = new Audio('Line_blast1.mp3');
-const sprintStartAudio = new Audio('level start.mp3');
-const adrenalineStartAudio = new Audio('fx-dramatic-cinematic-boom-sound-effect-249258.mp3');
-const flowRippleAudio = new Audio('Sugar stars.mp3');
-const cancelSprintAudio = new Audio('fail-144746.mp3');
-const completeSprintAudio = new Audio('Level_completed.mp3');
-const endSprintAudio = new Audio('fail-144746.mp3');
+const strategicRippleAudio = new Audio('laser_hit.wav');
+const tacticalRippleAudio = new Audio('Spin.mp3');
+const sprintStartAudio = new Audio('play.wav');
+const adrenalineStartAudio = new Audio('Dash.mp3');
+const flowRippleAudio = new Audio('Boost.mp3');
+const cancelSprintAudio = new Audio('Death.mp3');
+const completeSprintAudio = new Audio('highscore.wav');
+const endSprintAudio = new Audio('Drop.mp3');
 
 [pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio].forEach(audio => audio.volume = 1.0);
 
@@ -75,6 +76,7 @@ let flashIndex = -1, quoteIndex = 0;
 let sprintInitialDuration, sprintEndTime, adrenalinePhaseTriggered = false;
 let sprintGoal = 0;
 let sprintsCompleted = 0;
+let isDebriefingActive = false; // NEW: Gatekeeper for post-sprint feedback
 
 // --- Core State Machine ---
 function setMode(newMode) {
@@ -210,23 +212,13 @@ function launchSprint() {
 
 function endSprint(reason = 'timeout') {
     if (!isSprintActive) return;
-
-    // --- Performance Ledger Logic ---
-    let progressMessage = '';
-if (reason === 'completed' && sprintInitialDuration >= 20 * 60 * 1000) {
-        sprintsCompleted++;
-        saveStateToStorage();
-        updateGoalDisplay();
-        if (sprintGoal > 0) {
-            const percentage = Math.round((sprintsCompleted / sprintGoal) * 100);
-            progressMessage = `${percentage}% of Daily Goal Complete`;
-        }
-    }
-    sprintProgressDisplay.textContent = progressMessage;
-    
     isSprintActive = false;
-    clearInterval(masterInterval);
+    clearInterval(masterInterval); // Halt the primary timer immediately
 
+    // --- NEW: Engage Debriefing Shield ---
+    isDebriefingActive = true;
+
+    // --- Debriefing Protocol ---
     let messageHTML = '';
     switch (reason) {
         case 'cancelled':
@@ -247,27 +239,49 @@ if (reason === 'completed' && sprintInitialDuration >= 20 * 60 * 1000) {
             break;
     }
 
+    // --- Performance Ledger Logic ---
+    let progressMessage = '';
+    if ((reason === 'completed' || reason === 'timeout') && sprintInitialDuration >= 20 * 60 * 1000) { // Using trial value of 1 min
+        sprintsCompleted++;
+        saveStateToStorage();
+        updateGoalDisplay();
+        if (sprintGoal > 0) {
+            const percentage = Math.round((sprintsCompleted / sprintGoal) * 100);
+            progressMessage = `${percentage}% of Daily Goal Complete`;
+        }
+    }
+    sprintProgressDisplay.textContent = progressMessage;
+
+    // Display the debriefing
     postSprintMessage.innerHTML = messageHTML;
     postSprintOverlay.classList.add('visible');
 
+    // --- RE-FORGED: Timed System Restoration ---
     setTimeout(() => {
+        // Hide the overlay
         postSprintOverlay.classList.remove('visible');
-    }, 4500); // Increased duration for readability
-    
-    stopFlowStateAesthetics();
-    stopDigitFlasher();
-    stopQuoteCycler();
-    destroyStarfield();
-    flowQuoteDisplay.classList.remove('visible');
-    sublimatedMacroValue.textContent = '';
-    sublimatedMacroUnit.textContent = '';
-    
-    masterInterval = setInterval(updateDisplay, 1000);
-    updateBodyClass();
-    updateDisplay();
+
+        // Deactivate all sprint systems
+        stopFlowStateAesthetics();
+        stopDigitFlasher();
+        stopQuoteCycler();
+        destroyStarfield();
+        flowQuoteDisplay.classList.remove('visible');
+        sublimatedMacroValue.textContent = '';
+        sublimatedMacroUnit.textContent = '';
+
+        // --- NEW: Lower Debriefing Shield ---
+        isDebriefingActive = false;
+
+        // Restore primary systems AFTER debriefing is complete
+        masterInterval = setInterval(updateDisplay, 1000);
+        updateBodyClass();
+        updateDisplay();
+    }, 4500);
 }
 // --- Kinetic Feedback Core ---
 function triggerKineticFeedback(oldValue) {
+    if (isDebriefingActive) return; // Mission abort if debriefing is active
     timeValueDisplay.setAttribute('data-old-value', oldValue);
     timeValueDisplay.classList.add('value-changed');
     clearTimeout(animationTimeout);
@@ -455,6 +469,7 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.log('Aethesi ServiceWorker registration failed: ', err));
     });
 }
+
 
 
 
