@@ -112,9 +112,14 @@ body::after { background-image: linear-gradient(to top, #050507 85%, rgba(99, 15
 }
 
 header {
-    position: absolute; top: 0; left: 0;
-    width: 100%; padding: 2.5rem;
-    display: flex; justify-content: space-between; align-items: center;
+    position: absolute; 
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    padding: 2.5rem;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
     z-index: 10;
 }
 #brand-logo, #realtime-clock { transition: opacity 0.5s ease; }
@@ -201,7 +206,17 @@ header {
     transform: translate(-50%, -50%) scale(0);
     opacity: 0; pointer-events: none;
 }
-
+/* --- RE-FORGED: Performance Ledger Styling --- */
+#sprint-goal-tracker {
+    display: flex; /* Inherits flex properties from the header */
+    align-items: center;
+    gap: 0.75rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    color: rgba(255, 255, 255, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s ease;
+}
 .strategic-mode #time-value.value-changed { animation: color-flash-purple 0.8s ease-in-out; }
 .tactical-mode:not(.sprint-active) #time-value.value-changed { animation: color-flash-red 0.8s ease-in-out; }
 .value-changed::before { animation: ghost-fly-up 3s cubic-bezier(0.1, 0.7, 0.2, 1); }
@@ -353,5 +368,123 @@ body.fullscreen-active .enter-fullscreen { display: none; }
     #timer-display { flex-direction: column; align-items: center; gap: 0.5rem; }
     .mode-switch label { padding: 6px 18px; font-size: 0.8rem; }
 }
+/* --- NEW: Post-Sprint Debriefing System --- */
+#post-sprint-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100; /* Must be on top of all other elements */
+    background-color: rgba(5, 5, 7, 0.85); /* A dark, focused overlay */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.5s ease, visibility 0.5s;
+    flex-direction: column; /* Forces vertical stacking */
+}
+
+#post-sprint-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+#post-sprint-message {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: clamp(3rem, 10vw, 6rem);
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    text-align: center; /* Ensures perfect centering for multi-line text */
+    opacity: 0;
+    transform: scale(0.9); /* Re-purposed for animation only */
+    transition: opacity 0.6s cubic-bezier(0.19, 1, 0.22, 1) 0.2s, transform 0.6s cubic-bezier(0.19, 1, 0.22, 1) 0.2s;
+}
+
+#post-sprint-overlay.visible #post-sprint-message {
+    opacity: 1;
+    transform: scale(1);
+}
+/* --- NEW: Contextual Glow Styles --- */
+#post-sprint-message .glow-green {
+    color: #2eff7b;
+    text-shadow: 0 0 10px #2eff7b, 0 0 20px rgba(46, 255, 123, 0.5);
+}
+
+#post-sprint-message .glow-purple {
+    color: #c084fc;
+    text-shadow: 0 0 10px #c084fc, 0 0 20px rgba(192, 132, 252, 0.5);
+}
+
+#post-sprint-message .glow-orange {
+    color: #ffbe0b;
+    text-shadow: 0 0 10px #ffbe0b, 0 0 20px rgba(255, 190, 11, 0.5);
+}
+/* --- NEW: Performance Ledger Styling --- */
+
+.home-mode #sprint-goal-tracker {
+    opacity: 1;
+    visibility: visible;
+}
+#sprint-goal-tracker label {
+    font-size: 0.9rem;
+    font-weight: 400;
+}
+#sprint-goal-display {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+#sprint-goal-input {
+    width: 50px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+#sprint-goal-input:focus {
+    border-bottom-color: #ffffff;
+}
+#sprint-goal-input:hover {
+    border-bottom-color: #ffffff;
+}
+
+#sprint-progress-display {
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 0.5rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease 0.4s, transform 0.5s ease 0.4s;
+}
+#post-sprint-overlay.visible #sprint-progress-display {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive adjustment for the new element */
+@media (max-width: 768px) {
+    #sprint-goal-tracker {
+        bottom: 1.5rem;
+        left: 1.5rem;
+    }
+}
+
 
 
