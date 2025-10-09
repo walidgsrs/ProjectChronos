@@ -42,5 +42,9 @@
             "sizes": "512x512",
             "type": "image/png"
         }
+],
+    "permissions": [
+        "periodic-background-sync",
+        "notifications"
     ]
 }
