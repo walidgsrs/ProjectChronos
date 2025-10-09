@@ -21,11 +21,16 @@
 <header>
         <div id="brand-logo">Aethesi Protocol</div>
         <!-- The Ledger is now structurally part of the header -->
-        <div id="sprint-goal-tracker">
-            <label for="sprint-goal-input">Daily Sprint Goal:</label>
-            <span id="sprint-goal-display">0/0</span>
+<div id="sprint-goal-tracker">
+        <label for="sprint-goal-input">Daily Sprint Goal:</label>
+        <span id="sprint-goal-display">0/0</span>
+        <!-- NEW: Forged Number Input Wrapper -->
+        <div class="number-input-wrapper">
+            <button class="decrement" id="goal-decrement">-</button>
             <input type="number" id="sprint-goal-input" min="0">
+            <button class="increment" id="goal-increment">+</button>
         </div>
+    </div>
         <div id="sublimated-macro-container">
             <span id="macro-value"></span>
             <span id="macro-unit"></span>
@@ -61,8 +66,13 @@
 
     <div id="sprint-setup">
         <h4 id="sprint-prompt">Start a Sprint!</h4>
-        <div class="sprint-input-group">
-            <input type="number" id="sprint-duration-input" placeholder="MIN" min="1" max="180">
+<div class="sprint-input-group">
+            <!-- NEW: Forged Number Input Wrapper -->
+            <div class="number-input-wrapper">
+                <button class="decrement" id="sprint-decrement">-</button>
+                <input type="number" id="sprint-duration-input" placeholder="MIN" min="1" max="180">
+                <button class="increment" id="sprint-increment">+</button>
+            </div>
             <button id="launch-sprint-button">LAUNCH</button>
         </div>
     </div>
@@ -88,4 +98,5 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
