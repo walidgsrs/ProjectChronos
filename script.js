@@ -7,10 +7,10 @@ const targetDate = new Date('2028-05-21T00:00:00+01:00');
 // --- Audio Arsenal ---
 const pulseAudio = new Audio('Pulse.mp3');
 const strategicRippleAudio = new Audio('laser_hit.wav');
-const tacticalRippleAudio = new Audio('Spin.mp3');
+const tacticalRippleAudio = new Audio('se_dashpanel_d.mp3');
 const sprintStartAudio = new Audio('play.wav');
-const adrenalineStartAudio = new Audio('Dash.mp3');
-const flowRippleAudio = new Audio('Boost.mp3');
+const adrenalineStartAudio = new Audio('Boost.mp3');
+const flowRippleAudio = new Audio('Dash.mp3');
 const cancelSprintAudio = new Audio('Death.mp3');
 const completeSprintAudio = new Audio('highscore.wav');
 const endSprintAudio = new Audio('Drop.mp3');
@@ -66,6 +66,11 @@ const sprintGoalTracker = document.getElementById('sprint-goal-tracker');
 const sprintGoalInput = document.getElementById('sprint-goal-input');
 const sprintGoalDisplay = document.getElementById('sprint-goal-display');
 const sprintProgressDisplay = document.getElementById('sprint-progress-display');
+// --- NEW: Forged Input Control Levers ---
+const goalDecrement = document.getElementById('goal-decrement');
+const goalIncrement = document.getElementById('goal-increment');
+const sprintDecrement = document.getElementById('sprint-decrement');
+const sprintIncrement = document.getElementById('sprint-increment');
 
 // --- System State Variables ---
 let currentMode = 'home';
@@ -397,13 +402,59 @@ function toggleFullscreen() {
 }
 function updateFullscreenIcon() { updateBodyClass(); }
 // --- NEW: Persistence Engine (localStorage) ---
-function saveStateToStorage() {
-    const today = new Date().toLocaleDateString(); // Get YYYY-MM-DD
-    localStorage.setItem('aethesiDashboardState', JSON.stringify({
+// --- RE-FORGED: Persistence Engine (IndexedDB & localStorage) ---
+let db;
+function openDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('AethesiDB', 1);
+        request.onupgradeneeded = event => {
+            const db = event.target.result;
+            db.createObjectStore('dashboardState');
+        };
+        request.onsuccess = event => {
+            db = event.target.result;
+            resolve(db);
+        };
+        request.onerror = event => {
+            reject(event.target.error);
+        };
+    });
+}
+
+function saveState() {
+    const today = new Date().toLocaleDateString();
+    const state = {
         sprintGoal: sprintGoal,
         sprintsCompleted: sprintsCompleted,
         lastUpdated: today
-    }));
+    };
+
+    // Save to localStorage for instant UI access
+    localStorage.setItem('aethesiDashboardState', JSON.stringify(state));
+
+    // Save to IndexedDB for the Service Worker
+    if (db) {
+        const transaction = db.transaction(['dashboardState'], 'readwrite');
+        const objectStore = transaction.objectStore('dashboardState');
+        objectStore.put(state, 'currentState');
+    }
+}
+
+function loadState() {
+    const state = JSON.parse(localStorage.getItem('aethesiDashboardState'));
+    const today = new Date().toLocaleDateString();
+    
+    if (state) {
+        if (state.lastUpdated !== today) {
+            sprintGoal = state.sprintGoal || 0;
+            sprintsCompleted = 0;
+        } else {
+            sprintGoal = state.sprintGoal || 0;
+            sprintsCompleted = state.sprintsCompleted || 0;
+        }
+    }
+    updateGoalDisplay();
+    saveState(); // Sync with IndexedDB on load
 }
 
 function loadStateFromStorage() {
@@ -449,7 +500,21 @@ function initializeDashboard() {
         updateGoalDisplay();
         saveStateToStorage();
     });
-
+// --- NEW: Forged Input Control Listeners ---
+    goalDecrement.addEventListener('click', () => {
+        sprintGoalInput.stepDown();
+        sprintGoalInput.dispatchEvent(new Event('change')); // Force state save
+    });
+    goalIncrement.addEventListener('click', () => {
+        sprintGoalInput.stepUp();
+        sprintGoalInput.dispatchEvent(new Event('change')); // Force state save
+    });
+    sprintDecrement.addEventListener('click', () => {
+        sprintDurationInput.stepDown();
+    });
+    sprintIncrement.addEventListener('click', () => {
+        sprintDurationInput.stepUp();
+    });
     loadStateFromStorage();
 
     updateDisplay();
@@ -469,7 +534,6 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.log('Aethesi ServiceWorker registration failed: ', err));
     });
 }
-
 
 
 
