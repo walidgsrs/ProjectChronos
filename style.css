@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-/* --- NEW: Keyframe for the living Sprint Timer glow --- */
+@import url('https://fonts.cdnfonts.com/css/itc-kabel-std');
 @keyframes sprint-glow {
     0%, 100% {
         /* The base, resting glow */
@@ -47,7 +46,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'ITC Kabel Std', sans-serif;
     color: #ffffff; background-color: #050507;
     overflow: hidden; display: flex; justify-content: center;
     align-items: center; min-height: 100vh;
@@ -211,7 +210,7 @@ header {
     display: flex; /* Inherits flex properties from the header */
     align-items: center;
     gap: 0.75rem;
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'ITC Kabel Std', sans-serif;
     color: rgba(255, 255, 255, 0.4);
     opacity: 0;
     visibility: hidden;
@@ -302,11 +301,71 @@ header {
     opacity: 1; transform: translateY(0) translateX(-50%);
     visibility: visible; pointer-events: auto;
 }
+/* --- NEW: Purge Default Number Input Spinners --- */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
 
+/* --- NEW: Forged Number Input Wrapper Styling --- */
+.number-input-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden; /* Ensures the sharp corners of the input are hidden */
+    transition: all 0.3s ease;
+}
+.number-input-wrapper:has(input:focus) { /* Modern selector for focus state */
+    border-color: #9f1239;
+    box-shadow: 0 0 10px rgba(255, 77, 77, 0.3);
+}
+
+.number-input-wrapper button {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.5rem;
+    font-weight: 400;
+    cursor: pointer;
+    padding: 0 12px;
+    align-self: stretch; /* Make buttons fill the height of the wrapper */
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.number-input-wrapper button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+.number-input-wrapper button:active {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Re-style the core input to be a seamless part of the wrapper */
+.number-input-wrapper input {
+    background: none;
+    border: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    width: 60px;
+    /* Purge the original styles */
+    border-radius: 0;
+    padding: 10px 0;
+}
+.number-input-wrapper input:focus {
+    /* Focus is now handled by the wrapper */
+    box-shadow: none;
+    border-color: transparent;
+}
 #sprint-duration-input {
     background-color: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px; color: #ffffff;
-font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1rem;
+    font-family: 'ITC Kabel Std', sans-serif; font-weight: 700; font-size: 1rem;
     text-align: center; width: 80px; padding: 10px;
     outline: none; transition: all 0.3s ease; -webkit-appearance: none; margin: 0;
 }
@@ -315,7 +374,7 @@ font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1rem;
 #launch-sprint-button {
     background-color: #9f1239; border: 1px solid rgba(255, 80, 80, 0.5);
     border-radius: 8px; color: #ffffff;
-font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1rem;
+    font-family: 'ITC Kabel Std', sans-serif; font-weight: 700; font-size: 1rem;
     padding: 10px 20px;
     cursor: pointer; outline: none; transition: background-color 0.3s ease, transform 0.2s ease;
 }
@@ -334,7 +393,7 @@ font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1rem;
 #cancel-sprint-button, #complete-sprint-button {
     background-color: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px; color: rgba(255, 255, 255, 0.6);
-font-family: 'Barlow Condensed', sans-serif; font-weight: 400; font-size: 0.8rem;
+    font-family: 'ITC Kabel Std', sans-serif; font-weight: 400; font-size: 0.8rem;
     padding: 8px 16px; cursor: pointer; transition: all 0.3s ease;
 }
 #cancel-sprint-button:hover { color: #ffffff; border-color: #ff4d4d; }
@@ -396,8 +455,8 @@ body.fullscreen-active .enter-fullscreen { display: none; }
 }
 
 #post-sprint-message {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
+    font-family: 'ITC Kabel Std', sans-serif;
+    font-weight: 700;
     font-size: clamp(3rem, 10vw, 6rem);
     color: #ffffff;
     text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
@@ -450,7 +509,7 @@ body.fullscreen-active .enter-fullscreen { display: none; }
     border: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     color: #ffffff;
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'ITC Kabel Std', sans-serif;
     font-weight: 700;
     font-size: 1.1rem;
     text-align: center;
@@ -485,6 +544,7 @@ body.fullscreen-active .enter-fullscreen { display: none; }
         left: 1.5rem;
     }
 }
+
 
 
 
