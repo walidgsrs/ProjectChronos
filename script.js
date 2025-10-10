@@ -423,14 +423,15 @@ function openDB() {
     });
 }
 // --- RE-FORGED: Precision Notification & Permission Engines ---
+// --- RE-FORGED: The Navigator & Sentinel Command Protocol ---
 function requestNotificationPermission() {
     Notification.requestPermission().then(permission => {
         notificationPrompt.classList.remove('visible');
         if (permission === 'granted') {
-            console.log('Aethesi Notification Protocol: Permission granted. Scheduling initiated.');
+            console.log('Navigator: Permission granted. Initiating scheduling protocol.');
             scheduleNextNotification();
         } else {
-            console.log('Aethesi Notification Protocol: Permission denied.');
+            console.log('Navigator: Permission denied.');
         }
     });
 }
@@ -439,7 +440,7 @@ function scheduleNextNotification() {
     const now = new Date();
     const currentMinutes = now.getMinutes();
 
-    // Calculate the next 15-minute mark in the hour
+    // --- TRIAL PROTOCOL: Calculate next 15-minute mark ---
     const nextMinuteMark = (Math.floor(currentMinutes / 15) + 1) * 15;
 
     const nextNotificationTime = new Date(now.getTime());
@@ -447,30 +448,26 @@ function scheduleNextNotification() {
     nextNotificationTime.setMilliseconds(0);
 
     if (nextMinuteMark === 60) {
-        // If the next mark is at the top of the hour, move to the next hour
         nextNotificationTime.setHours(now.getHours() + 1);
         nextNotificationTime.setMinutes(0);
     } else {
-        // Otherwise, just set the minutes for the current hour
         nextNotificationTime.setMinutes(nextMinuteMark);
     }
 
     const timeToNotification = nextNotificationTime.getTime() - now.getTime();
-    console.log(`Aethesi Scheduler (TRIAL PROTOCOL): Next notification scheduled for ${nextNotificationTime}`);
+    console.log(`Navigator: Next strike scheduled for ${nextNotificationTime}.`);
 
-    setTimeout(() => {
-        triggerScheduledNotification();
-        // After triggering, recursively schedule the next one in the sequence
-        scheduleNextNotification(); 
-    }, timeToNotification);
-}
+    // --- Command the Sentinel ---
+    if (navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+            command: 'schedule-notification',
+            timeToNotification: timeToNotification
+        });
+        console.log('Navigator: Command dispatched to Sentinel.');
+    }
 
-function triggerScheduledNotification() {
-    navigator.serviceWorker.ready.then(registration => {
-        // The service worker will read IndexedDB and show the notification
-        registration.sync.register('aethesi-check-sprints-now');
-        console.log('Aethesi Scheduler: Sync event dispatched to Service Worker.');
-    });
+    // Recursively schedule the next check from the main app, acting as a redundant backup.
+    setTimeout(scheduleNextNotification, timeToNotification + 1000); // Add 1s buffer
 }
 
 function saveState() {
