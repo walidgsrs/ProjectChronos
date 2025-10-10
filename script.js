@@ -71,6 +71,8 @@ const goalDecrement = document.getElementById('goal-decrement');
 const goalIncrement = document.getElementById('goal-increment');
 const sprintDecrement = document.getElementById('sprint-decrement');
 const sprintIncrement = document.getElementById('sprint-increment');
+const notificationPrompt = document.getElementById('notification-prompt');
+const enableNotificationsButton = document.getElementById('enable-notifications-button');
 
 // --- System State Variables ---
 let currentMode = 'home';
@@ -420,6 +422,56 @@ function openDB() {
         };
     });
 }
+// --- RE-FORGED: Precision Notification & Permission Engines ---
+function requestNotificationPermission() {
+    Notification.requestPermission().then(permission => {
+        notificationPrompt.classList.remove('visible');
+        if (permission === 'granted') {
+            console.log('Aethesi Notification Protocol: Permission granted. Scheduling initiated.');
+            scheduleNextNotification();
+        } else {
+            console.log('Aethesi Notification Protocol: Permission denied.');
+        }
+    });
+}
+
+function scheduleNextNotification() {
+    const now = new Date();
+    const currentHour = now.getHours();
+    
+    // Calculate the next even hour (0, 2, 4, ...)
+    let nextHour = (Math.floor(currentHour / 2) + 1) * 2;
+    if (nextHour >= 24) nextHour = 0; // Wrap around past midnight
+
+    const nextNotificationTime = new Date();
+    nextNotificationTime.setHours(nextHour);
+    nextNotificationTime.setMinutes(0);
+    nextNotificationTime.setSeconds(0);
+    nextNotificationTime.setMilliseconds(0);
+
+    // If we've already passed today's next hour, schedule for the next day's first slot
+    if (nextNotificationTime < now) {
+       nextNotificationTime.setDate(nextNotificationTime.getDate() + 1);
+       if(nextHour !== 0) nextNotificationTime.setHours(0); // If it wasn't midnight, the next one IS midnight
+    }
+
+    const timeToNotification = nextNotificationTime.getTime() - now.getTime();
+    console.log(`Aethesi Scheduler: Next notification scheduled for ${nextNotificationTime}`);
+
+    setTimeout(() => {
+        triggerScheduledNotification();
+        // After triggering, schedule the next one in the sequence
+        scheduleNextNotification(); 
+    }, timeToNotification);
+}
+
+function triggerScheduledNotification() {
+    navigator.serviceWorker.ready.then(registration => {
+        // The service worker will read IndexedDB and show the notification
+        registration.sync.register('aethesi-check-sprints-now');
+        console.log('Aethesi Scheduler: Sync event dispatched to Service Worker.');
+    });
+}
 
 function saveState() {
     const today = new Date().toLocaleDateString();
@@ -480,10 +532,13 @@ function updateGoalDisplay() {
 }
 
 // --- System Initialization ---
-function initializeDashboard() {
+async function initializeDashboard() {
+    await openDB();
+
     const targetText = `Target: ${targetDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
     targetDateDisplay.textContent = targetText;
     sublimatedTargetDate.textContent = targetText;
+    
     modeSwitches.forEach(sw => sw.addEventListener('change', () => setMode(sw.value)));
     fullscreenToggle.addEventListener('click', toggleFullscreen);
     launchSprintButton.addEventListener('click', launchSprint);
@@ -492,15 +547,24 @@ function initializeDashboard() {
     document.addEventListener('fullscreenchange', updateFullscreenIcon);
     document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
     document.addEventListener('keydown', handleHotkeys);
-    document.body.addEventListener('click', () => { 
-        [pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio].forEach(a => a.load());
-    }, { once: true });
+    
+    // --- RE-FORGED: Permission Protocol ---
+    enableNotificationsButton.addEventListener('click', requestNotificationPermission);
+    
+    // Check permission on load
+    if (Notification.permission === 'default') {
+        notificationPrompt.classList.add('visible');
+    } else if (Notification.permission === 'granted') {
+        // If permission is already granted, immediately start the scheduling loop
+        scheduleNextNotification();
+    }
+
     sprintGoalInput.addEventListener('change', () => {
         sprintGoal = parseInt(sprintGoalInput.value, 10) || 0;
         updateGoalDisplay();
-        saveStateToStorage();
+        saveState();
     });
-// --- NEW: Forged Input Control Listeners ---
+    // --- NEW: Restore Forged Input Control Listeners ---
     goalDecrement.addEventListener('click', () => {
         sprintGoalInput.stepDown();
         sprintGoalInput.dispatchEvent(new Event('change')); // Force state save
@@ -515,10 +579,13 @@ function initializeDashboard() {
     sprintIncrement.addEventListener('click', () => {
         sprintDurationInput.stepUp();
     });
-    loadStateFromStorage();
 
-    updateDisplay();
-    updateRealtimeClock();
+    loadState();
+    
+    document.body.addEventListener('click', () => { 
+        [pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio].forEach(a => a.load());
+    }, { once: true });
+    
     updateDisplay();
     updateRealtimeClock();
 }
@@ -534,7 +601,6 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.log('Aethesi ServiceWorker registration failed: ', err));
     });
 }
-
 
 
 
