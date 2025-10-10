@@ -427,6 +427,62 @@ body.fullscreen-active .enter-fullscreen { display: none; }
     #timer-display { flex-direction: column; align-items: center; gap: 0.5rem; }
     .mode-switch label { padding: 6px 18px; font-size: 0.8rem; }
 }
+/* --- NEW: Notification Permission Bastion Styling --- */
+#notification-prompt {
+    position: absolute;
+    bottom: 7rem; /* Positioned cleanly above the mode switch */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
+    background-color: #1a1a1e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) translateX(-50%);
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    pointer-events: none;
+}
+#notification-prompt.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) translateX(-50%);
+    pointer-events: auto;
+}
+#notification-prompt p {
+    font-size: 1rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    margin-bottom: 1rem;
+}
+#enable-notifications-button {
+    background-color: #4c1d95;
+    border: 1px solid rgba(192, 132, 252, 0.5);
+    border-radius: 8px;
+    color: #ffffff;
+    font-family: 'ITC Kabel Std', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 10px 20px;
+    width: 100%;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.3s ease;
+}
+#enable-notifications-button:hover {
+    background-color: #6a0dad;
+}
+
+@media (max-width: 768px) {
+    #notification-prompt {
+        bottom: 10rem;
+    }
+}
 /* --- NEW: Post-Sprint Debriefing System --- */
 #post-sprint-overlay {
     position: fixed;
