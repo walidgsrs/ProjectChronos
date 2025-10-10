@@ -437,30 +437,30 @@ function requestNotificationPermission() {
 
 function scheduleNextNotification() {
     const now = new Date();
-    const currentHour = now.getHours();
-    
-    // Calculate the next even hour (0, 2, 4, ...)
-    let nextHour = (Math.floor(currentHour / 2) + 1) * 2;
-    if (nextHour >= 24) nextHour = 0; // Wrap around past midnight
+    const currentMinutes = now.getMinutes();
 
-    const nextNotificationTime = new Date();
-    nextNotificationTime.setHours(nextHour);
-    nextNotificationTime.setMinutes(0);
+    // Calculate the next 15-minute mark in the hour
+    const nextMinuteMark = (Math.floor(currentMinutes / 15) + 1) * 15;
+
+    const nextNotificationTime = new Date(now.getTime());
     nextNotificationTime.setSeconds(0);
     nextNotificationTime.setMilliseconds(0);
 
-    // If we've already passed today's next hour, schedule for the next day's first slot
-    if (nextNotificationTime < now) {
-       nextNotificationTime.setDate(nextNotificationTime.getDate() + 1);
-       if(nextHour !== 0) nextNotificationTime.setHours(0); // If it wasn't midnight, the next one IS midnight
+    if (nextMinuteMark === 60) {
+        // If the next mark is at the top of the hour, move to the next hour
+        nextNotificationTime.setHours(now.getHours() + 1);
+        nextNotificationTime.setMinutes(0);
+    } else {
+        // Otherwise, just set the minutes for the current hour
+        nextNotificationTime.setMinutes(nextMinuteMark);
     }
 
     const timeToNotification = nextNotificationTime.getTime() - now.getTime();
-    console.log(`Aethesi Scheduler: Next notification scheduled for ${nextNotificationTime}`);
+    console.log(`Aethesi Scheduler (TRIAL PROTOCOL): Next notification scheduled for ${nextNotificationTime}`);
 
     setTimeout(() => {
         triggerScheduledNotification();
-        // After triggering, schedule the next one in the sequence
+        // After triggering, recursively schedule the next one in the sequence
         scheduleNextNotification(); 
     }, timeToNotification);
 }
@@ -532,13 +532,18 @@ function updateGoalDisplay() {
 }
 
 // --- System Initialization ---
-async function initializeDashboard() {
-    await openDB();
+function initializeDashboard() {
+    // Open the data conduit
+    openDB().then(() => {
+        // Load state only after DB is confirmed open
+        loadState();
+    });
 
     const targetText = `Target: ${targetDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
     targetDateDisplay.textContent = targetText;
     sublimatedTargetDate.textContent = targetText;
     
+    // --- COMMAND LINK RESTORATION ---
     modeSwitches.forEach(sw => sw.addEventListener('change', () => setMode(sw.value)));
     fullscreenToggle.addEventListener('click', toggleFullscreen);
     launchSprintButton.addEventListener('click', launchSprint);
@@ -548,30 +553,14 @@ async function initializeDashboard() {
     document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
     document.addEventListener('keydown', handleHotkeys);
     
-    // --- RE-FORGED: Permission Protocol ---
-    enableNotificationsButton.addEventListener('click', requestNotificationPermission);
-    
-    // Check permission on load
-    if (Notification.permission === 'default') {
-        notificationPrompt.classList.add('visible');
-    } else if (Notification.permission === 'granted') {
-        // If permission is already granted, immediately start the scheduling loop
-        scheduleNextNotification();
-    }
-
-    sprintGoalInput.addEventListener('change', () => {
-        sprintGoal = parseInt(sprintGoalInput.value, 10) || 0;
-        updateGoalDisplay();
-        saveState();
-    });
-    // --- NEW: Restore Forged Input Control Listeners ---
+    // --- TACTILE CONTROL LISTENERS RESTORED ---
     goalDecrement.addEventListener('click', () => {
         sprintGoalInput.stepDown();
-        sprintGoalInput.dispatchEvent(new Event('change')); // Force state save
+        sprintGoalInput.dispatchEvent(new Event('change'));
     });
     goalIncrement.addEventListener('click', () => {
         sprintGoalInput.stepUp();
-        sprintGoalInput.dispatchEvent(new Event('change')); // Force state save
+        sprintGoalInput.dispatchEvent(new Event('change'));
     });
     sprintDecrement.addEventListener('click', () => {
         sprintDurationInput.stepDown();
@@ -580,8 +569,21 @@ async function initializeDashboard() {
         sprintDurationInput.stepUp();
     });
 
-    loadState();
-    
+    // --- PERMISSION PROTOCOL ---
+    enableNotificationsButton.addEventListener('click', requestNotificationPermission);
+    if (Notification.permission === 'default') {
+        notificationPrompt.classList.add('visible');
+    } else if (Notification.permission === 'granted') {
+        scheduleNextNotification();
+    }
+
+    sprintGoalInput.addEventListener('change', () => {
+        sprintGoal = parseInt(sprintGoalInput.value, 10) || 0;
+        if (sprintGoal < 0) sprintGoal = 0; // Prevent negative goals
+        updateGoalDisplay();
+        saveState();
+    });
+
     document.body.addEventListener('click', () => { 
         [pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio].forEach(a => a.load());
     }, { once: true });
