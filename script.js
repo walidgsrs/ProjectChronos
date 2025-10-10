@@ -71,8 +71,6 @@ const goalDecrement = document.getElementById('goal-decrement');
 const goalIncrement = document.getElementById('goal-increment');
 const sprintDecrement = document.getElementById('sprint-decrement');
 const sprintIncrement = document.getElementById('sprint-increment');
-const notificationPrompt = document.getElementById('notification-prompt');
-const enableNotificationsButton = document.getElementById('enable-notifications-button');
 
 // --- System State Variables ---
 let currentMode = 'home';
@@ -220,9 +218,7 @@ function launchSprint() {
 function endSprint(reason = 'timeout') {
     if (!isSprintActive) return;
     isSprintActive = false;
-    clearInterval(masterInterval); // Halt the primary timer immediately
-
-    // --- NEW: Engage Debriefing Shield ---
+    clearInterval(masterInterval); // Halt the primary timer
     isDebriefingActive = true;
 
     // --- Debriefing Protocol ---
@@ -248,9 +244,10 @@ function endSprint(reason = 'timeout') {
 
     // --- Performance Ledger Logic ---
     let progressMessage = '';
-    if ((reason === 'completed' || reason === 'timeout') && sprintInitialDuration >= 20 * 60 * 1000) { // Using trial value of 1 min
+    // NOTE: This uses your 20-minute standard. Change '20' to '1' for testing.
+    if ((reason === 'completed' || reason === 'timeout') && sprintInitialDuration >= 20 * 60 * 1000) {
         sprintsCompleted++;
-        saveStateToStorage();
+        saveState();
         updateGoalDisplay();
         if (sprintGoal > 0) {
             const percentage = Math.round((sprintsCompleted / sprintGoal) * 100);
@@ -259,16 +256,11 @@ function endSprint(reason = 'timeout') {
     }
     sprintProgressDisplay.textContent = progressMessage;
 
-    // Display the debriefing
     postSprintMessage.innerHTML = messageHTML;
     postSprintOverlay.classList.add('visible');
 
-    // --- RE-FORGED: Timed System Restoration ---
     setTimeout(() => {
-        // Hide the overlay
         postSprintOverlay.classList.remove('visible');
-
-        // Deactivate all sprint systems
         stopFlowStateAesthetics();
         stopDigitFlasher();
         stopQuoteCycler();
@@ -276,11 +268,7 @@ function endSprint(reason = 'timeout') {
         flowQuoteDisplay.classList.remove('visible');
         sublimatedMacroValue.textContent = '';
         sublimatedMacroUnit.textContent = '';
-
-        // --- NEW: Lower Debriefing Shield ---
         isDebriefingActive = false;
-
-        // Restore primary systems AFTER debriefing is complete
         masterInterval = setInterval(updateDisplay, 1000);
         updateBodyClass();
         updateDisplay();
@@ -340,11 +328,11 @@ function updateDisplay() {
         timeUnitDisplay.textContent = 'SPRINT';
 
         if (adrenalinePhaseTriggered) {
-            if (seconds % 10 === 0 && (sprintInitialDuration - timeLeft) > 1000) { // Prevents initial trigger
+            if (seconds % 10 === 0 && (sprintInitialDuration - timeLeft) > 1000) {
                 triggerKineticFeedback(oldValue);
             }
         } else {
-            if (seconds === 59 && (sprintInitialDuration - timeLeft) > 1000) { // Trigger on the changeover
+            if (seconds === 59 && (sprintInitialDuration - timeLeft) > 1000) {
                 triggerKineticFeedback(oldValue);
             }
         }
@@ -506,41 +494,20 @@ function loadState() {
     saveState(); // Sync with IndexedDB on load
 }
 
-function loadStateFromStorage() {
-    const state = JSON.parse(localStorage.getItem('aethesiDashboardState'));
-    const today = new Date().toLocaleDateString();
-    
-    if (state) {
-        // If the saved data is not from today, reset the completion count
-        if (state.lastUpdated !== today) {
-            sprintGoal = state.sprintGoal || 0;
-            sprintsCompleted = 0; // Reset for the new day
-        } else {
-            sprintGoal = state.sprintGoal || 0;
-            sprintsCompleted = state.sprintsCompleted || 0;
-        }
-    }
-    updateGoalDisplay();
-}
-
 function updateGoalDisplay() {
     sprintGoalInput.value = sprintGoal > 0 ? sprintGoal : '';
     sprintGoalDisplay.textContent = `${sprintsCompleted}/${sprintGoal > 0 ? sprintGoal : '?'}`;
 }
 
 // --- System Initialization ---
-function initializeDashboard() {
-    // Open the data conduit
-    openDB().then(() => {
-        // Load state only after DB is confirmed open
-        loadState();
-    });
+async function initializeDashboard() {
+    await openDB();
+    loadState();
 
     const targetText = `Target: ${targetDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
     targetDateDisplay.textContent = targetText;
     sublimatedTargetDate.textContent = targetText;
     
-    // --- COMMAND LINK RESTORATION ---
     modeSwitches.forEach(sw => sw.addEventListener('change', () => setMode(sw.value)));
     fullscreenToggle.addEventListener('click', toggleFullscreen);
     launchSprintButton.addEventListener('click', launchSprint);
@@ -550,7 +517,6 @@ function initializeDashboard() {
     document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
     document.addEventListener('keydown', handleHotkeys);
     
-    // --- TACTILE CONTROL LISTENERS RESTORED ---
     goalDecrement.addEventListener('click', () => {
         sprintGoalInput.stepDown();
         sprintGoalInput.dispatchEvent(new Event('change'));
@@ -565,18 +531,17 @@ function initializeDashboard() {
     sprintIncrement.addEventListener('click', () => {
         sprintDurationInput.stepUp();
     });
-
-    // --- PERMISSION PROTOCOL ---
+    
     enableNotificationsButton.addEventListener('click', requestNotificationPermission);
     if (Notification.permission === 'default') {
         notificationPrompt.classList.add('visible');
     } else if (Notification.permission === 'granted') {
-        scheduleNextNotification();
+        // This logic is now handled by the server-side Command Relay. No client-side scheduling is needed.
     }
 
     sprintGoalInput.addEventListener('change', () => {
         sprintGoal = parseInt(sprintGoalInput.value, 10) || 0;
-        if (sprintGoal < 0) sprintGoal = 0; // Prevent negative goals
+        if (sprintGoal < 0) sprintGoal = 0;
         updateGoalDisplay();
         saveState();
     });
@@ -600,6 +565,7 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.log('Aethesi ServiceWorker registration failed: ', err));
     });
 }
+
 
 
 
