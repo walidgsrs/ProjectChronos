@@ -218,7 +218,7 @@ function launchSprint() {
 function endSprint(reason = 'timeout') {
     if (!isSprintActive) return;
     isSprintActive = false;
-    clearInterval(masterInterval); // Halt the primary timer
+    clearInterval(masterInterval);
     isDebriefingActive = true;
 
     // --- Debriefing Protocol ---
@@ -244,10 +244,9 @@ function endSprint(reason = 'timeout') {
 
     // --- Performance Ledger Logic ---
     let progressMessage = '';
-    // NOTE: This uses your 20-minute standard. Change '20' to '1' for testing.
     if ((reason === 'completed' || reason === 'timeout') && sprintInitialDuration >= 20 * 60 * 1000) {
         sprintsCompleted++;
-        saveState();
+        saveStateToStorage(); // Correctly calls the restored persistence engine
         updateGoalDisplay();
         if (sprintGoal > 0) {
             const percentage = Math.round((sprintsCompleted / sprintGoal) * 100);
@@ -391,93 +390,18 @@ function toggleFullscreen() {
     }
 }
 function updateFullscreenIcon() { updateBodyClass(); }
-// --- NEW: Persistence Engine (localStorage) ---
-// --- RE-FORGED: Persistence Engine (IndexedDB & localStorage) ---
-let db;
-function openDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open('AethesiDB', 1);
-        request.onupgradeneeded = event => {
-            const db = event.target.result;
-            db.createObjectStore('dashboardState');
-        };
-        request.onsuccess = event => {
-            db = event.target.result;
-            resolve(db);
-        };
-        request.onerror = event => {
-            reject(event.target.error);
-        };
-    });
-}
-// --- RE-FORGED: Precision Notification & Permission Engines ---
-// --- RE-FORGED: The Navigator & Sentinel Command Protocol ---
-function requestNotificationPermission() {
-    Notification.requestPermission().then(permission => {
-        notificationPrompt.classList.remove('visible');
-        if (permission === 'granted') {
-            console.log('Navigator: Permission granted. Initiating scheduling protocol.');
-            scheduleNextNotification();
-        } else {
-            console.log('Navigator: Permission denied.');
-        }
-    });
-}
 
-function scheduleNextNotification() {
-    const now = new Date();
-    const currentMinutes = now.getMinutes();
-
-    // --- TRIAL PROTOCOL: Calculate next 15-minute mark ---
-    const nextMinuteMark = (Math.floor(currentMinutes / 15) + 1) * 15;
-
-    const nextNotificationTime = new Date(now.getTime());
-    nextNotificationTime.setSeconds(0);
-    nextNotificationTime.setMilliseconds(0);
-
-    if (nextMinuteMark === 60) {
-        nextNotificationTime.setHours(now.getHours() + 1);
-        nextNotificationTime.setMinutes(0);
-    } else {
-        nextNotificationTime.setMinutes(nextMinuteMark);
-    }
-
-    const timeToNotification = nextNotificationTime.getTime() - now.getTime();
-    console.log(`Navigator: Next strike scheduled for ${nextNotificationTime}.`);
-
-    // --- Command the Sentinel ---
-    if (navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-            command: 'schedule-notification',
-            timeToNotification: timeToNotification
-        });
-        console.log('Navigator: Command dispatched to Sentinel.');
-    }
-
-    // Recursively schedule the next check from the main app, acting as a redundant backup.
-    setTimeout(scheduleNextNotification, timeToNotification + 1000); // Add 1s buffer
-}
-
-function saveState() {
+// --- RE-FORGED: Streamlined Persistence Engine (localStorage only) ---
+function saveStateToStorage() {
     const today = new Date().toLocaleDateString();
-    const state = {
+    localStorage.setItem('aethesiDashboardState', JSON.stringify({
         sprintGoal: sprintGoal,
         sprintsCompleted: sprintsCompleted,
         lastUpdated: today
-    };
-
-    // Save to localStorage for instant UI access
-    localStorage.setItem('aethesiDashboardState', JSON.stringify(state));
-
-    // Save to IndexedDB for the Service Worker
-    if (db) {
-        const transaction = db.transaction(['dashboardState'], 'readwrite');
-        const objectStore = transaction.objectStore('dashboardState');
-        objectStore.put(state, 'currentState');
-    }
+    }));
 }
 
-function loadState() {
+function loadStateFromStorage() {
     const state = JSON.parse(localStorage.getItem('aethesiDashboardState'));
     const today = new Date().toLocaleDateString();
     
@@ -491,7 +415,7 @@ function loadState() {
         }
     }
     updateGoalDisplay();
-    saveState(); // Sync with IndexedDB on load
+    saveStateToStorage();
 }
 
 function updateGoalDisplay() {
@@ -501,9 +425,6 @@ function updateGoalDisplay() {
 
 // --- System Initialization ---
 async function initializeDashboard() {
-    await openDB();
-    loadState();
-
     const targetText = `Target: ${targetDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
     targetDateDisplay.textContent = targetText;
     sublimatedTargetDate.textContent = targetText;
@@ -532,20 +453,15 @@ async function initializeDashboard() {
         sprintDurationInput.stepUp();
     });
     
-    enableNotificationsButton.addEventListener('click', requestNotificationPermission);
-    if (Notification.permission === 'default') {
-        notificationPrompt.classList.add('visible');
-    } else if (Notification.permission === 'granted') {
-        // This logic is now handled by the server-side Command Relay. No client-side scheduling is needed.
-    }
-
     sprintGoalInput.addEventListener('change', () => {
         sprintGoal = parseInt(sprintGoalInput.value, 10) || 0;
         if (sprintGoal < 0) sprintGoal = 0;
         updateGoalDisplay();
-        saveState();
+        saveStateToStorage(); // Corrected function call
     });
 
+    loadStateFromStorage(); // Corrected function call
+    
     document.body.addEventListener('click', () => { 
         [pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio].forEach(a => a.load());
     }, { once: true });
@@ -565,6 +481,7 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.log('Aethesi ServiceWorker registration failed: ', err));
     });
 }
+
 
 
 
