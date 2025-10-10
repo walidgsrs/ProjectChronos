@@ -1,5 +1,5 @@
 // Aethesi Supremacy Protocol: Service Worker (Purged)
-const CACHE_NAME = 'aethesi-dashboard-final-v1'; // Increment version to force update
+const CACHE_NAME = 'aethesi-dashboard-final-v2'; // Version incremented to force update
 const assetsToCache = [
     './',
     './index.html',
@@ -29,5 +29,6 @@ self.addEventListener('fetch', event => {
         caches.match(event.request).then(response => response || fetch(event.request))
     );
 });
+
 
 
