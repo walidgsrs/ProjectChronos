@@ -41,6 +41,14 @@
 
     <main id="command-center">
 <div id="display-area">
+                <!-- NEW: The Mission Designator Armature -->
+            <div id="task-name-container">
+                <h2 id="task-name"></h2>
+                <input type="text" id="task-name-input" autocomplete="off">
+                <button id="edit-task-name-button" title="Edit Task Name">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16.75,2.92L19,5.17l-1.41,1.41L15.34,4.34M13.93,18.89H5v-8.93l6.5-6.5l2.83,2.83l-6.5,6.5V17.5h2.83l6.5-6.5l2.83,2.83l-6.5,6.5Z"/></svg>
+                </button>
+            </div>
             <div id="timer-display">
                 <div id="ripple-effect-container"></div>
                 <div id="time-value" data-old-value=""></div> 
@@ -91,13 +99,12 @@
 <!-- NEW: Post-Sprint Debriefing Layer -->
     <div id="post-sprint-overlay">
         <h1 id="post-sprint-message"></h1>
+        <!-- NEW: Container for the progress report -->
         <p id="sprint-progress-display"></p>
     </div>
     <script src="script.js"></script>
 </body>
 </html>
-
-
 
 
 
