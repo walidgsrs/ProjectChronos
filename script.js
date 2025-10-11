@@ -71,9 +71,14 @@ const goalDecrement = document.getElementById('goal-decrement');
 const goalIncrement = document.getElementById('goal-increment');
 const sprintDecrement = document.getElementById('sprint-decrement');
 const sprintIncrement = document.getElementById('sprint-increment');
+const taskNameContainer = document.getElementById('task-name-container');
+const taskNameDisplay = document.getElementById('task-name');
+const taskNameInput = document.getElementById('task-name-input');
+const editTaskNameButton = document.getElementById('edit-task-name-button');
 
 // --- System State Variables ---
 let currentMode = 'home';
+taskNameContainer.classList.remove('editing'); // Ensure editing mode is cancelled on sprint end
 let isSprintActive = false;
 let animationTimeout, rippleTimeout, masterInterval;
 let flowStateAnimationId, digitFlashTimeoutId, quoteInterval;
@@ -82,6 +87,7 @@ let sprintInitialDuration, sprintEndTime, adrenalinePhaseTriggered = false;
 let sprintGoal = 0;
 let sprintsCompleted = 0;
 let isDebriefingActive = false; // NEW: Gatekeeper for post-sprint feedback
+let currentTaskName = "Tactical Sprint";
 
 // --- Core State Machine ---
 function setMode(newMode) {
@@ -203,6 +209,9 @@ function launchSprint() {
     sublimatedMacroUnit.textContent = timeUnitDisplay.textContent;
     sprintStartAudio.currentTime = 0;
     sprintStartAudio.play().catch(e => {});
+    // Set default task name for new sprint
+    currentTaskName = "Tactical Sprint";
+    taskNameDisplay.textContent = currentTaskName;
     isSprintActive = true;
     sprintInitialDuration = durationMinutes * 60 * 1000;
     sprintEndTime = Date.now() + sprintInitialDuration;
@@ -434,6 +443,26 @@ async function initializeDashboard() {
     launchSprintButton.addEventListener('click', launchSprint);
     cancelSprintButton.addEventListener('click', () => endSprint('cancelled'));
     completeSprintButton.addEventListener('click', () => endSprint('completed'));
+    // --- NEW: Mission Designator Listeners ---
+    editTaskNameButton.addEventListener('click', () => {
+        taskNameContainer.classList.add('editing');
+        taskNameInput.value = currentTaskName;
+        taskNameInput.focus();
+    });
+
+    taskNameInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            currentTaskName = taskNameInput.value.trim() || "Tactical Sprint"; // Fallback to default
+            taskNameDisplay.textContent = currentTaskName;
+            taskNameContainer.classList.remove('editing');
+        }
+    });
+
+    taskNameInput.addEventListener('blur', () => { // Confirm on clicking away
+        currentTaskName = taskNameInput.value.trim() || "Tactical Sprint";
+        taskNameDisplay.textContent = currentTaskName;
+        taskNameContainer.classList.remove('editing');
+    });
     document.addEventListener('fullscreenchange', updateFullscreenIcon);
     document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
     document.addEventListener('keydown', handleHotkeys);
@@ -481,12 +510,6 @@ if ('serviceWorker' in navigator) {
         .catch(err => console.log('Aethesi ServiceWorker registration failed: ', err));
     });
 }
-
-
-
-
-
-
 
 
 
