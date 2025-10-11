@@ -544,7 +544,67 @@ body.fullscreen-active .enter-fullscreen { display: none; }
         left: 1.5rem;
     }
 }
-
+/* --- NEW: Mission Designator Styling --- */
+#task-name-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    opacity: 0;
+    visibility: hidden;
+    max-height: 0;
+    transition: all 0.5s ease;
+}
+.sprint-active #task-name-container {
+    opacity: 1;
+    visibility: visible;
+    max-height: 100px;
+}
+#task-name, #task-name-input {
+    font-family: 'ITC Kabel Std', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    color: rgba(255, 255, 255, 0.8);
+    background: none;
+    border: none;
+    outline: none;
+    text-align: center;
+}
+#task-name {
+    transition: opacity 0.3s ease;
+}
+#task-name-input {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    width: 60%;
+    max-width: 500px;
+    padding: 5px;
+    display: none; /* Hidden by default */
+}
+#edit-task-name-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+    padding: 5px;
+}
+#edit-task-name-button:hover {
+    opacity: 1;
+}
+#edit-task-name-button svg {
+    width: 24px;
+    height: 24px;
+    fill: #ffffff;
+}
+/* State control for editing */
+#task-name-container.editing #task-name,
+#task-name-container.editing #edit-task-name-button {
+    display: none;
+}
+#task-name-container.editing #task-name-input {
+    display: block;
+}
 
 
 
