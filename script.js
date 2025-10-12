@@ -504,12 +504,38 @@ masterInterval = setInterval(updateDisplay, 1000);
 document.addEventListener('DOMContentLoaded', initializeDashboard);
 setInterval(updateRealtimeClock, 1000);
 
+// --- RE-FORGED: PWA Service Worker Registration with Update Protocol ---
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => console.log('Aethesi ServiceWorker registered.'))
-        .catch(err => console.log('Aethesi ServiceWorker registration failed: ', err));
+    const updateNotification = document.getElementById('update-notification');
+    const reloadButton = document.getElementById('reload-button');
+    let newWorker;
+
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+        reg.addEventListener('updatefound', () => {
+            // A new version of the service worker has been found.
+            newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+                // The new worker is installed and waiting to take control.
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // Make the update notification visible.
+                    updateNotification.classList.add('visible');
+                }
+            });
+        });
+    });
+
+    reloadButton.addEventListener('click', () => {
+        // Send the command to the new worker to take over.
+        newWorker.postMessage({ action: 'skipWaiting' });
+    });
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        // The new worker has taken control. Reload the page to use the new assets.
+        window.location.reload();
     });
 }
+
+
 
 
 
