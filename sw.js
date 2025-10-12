@@ -1,5 +1,5 @@
 // Aethesi Supremacy Protocol: Service Worker (v2 - Self-Purging)
-const CACHE_NAME = 'aethesi-dashboard-v2'; // The version number is the key.
+const CACHE_NAME = 'aethesi-dashboard-v3'; // The version number is the key.
 
 // This list must contain every file our app needs to function offline.
 const assetsToCache = [
@@ -53,6 +53,7 @@ self.addEventListener('message', event => {
         self.skipWaiting();
     }
 });
+
 
 
 
