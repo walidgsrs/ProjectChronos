@@ -17,29 +17,29 @@ const endSprintAudio = new Audio('Drop.mp3');
 
 [pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio].forEach(audio => audio.volume = 1.0);
 
-// --- Brunnian Link Data Store ---
+// --- The EψM Doctrine Data Store ---
 const BRUNNIAN_QUOTES = [
-    "Structure without Power is a monument. Power without Innovation is a tantrum. Innovation without Leverage is a dream. Leverage without Structure is a ghost. You need all four, always.",
-    "Our strategy is a fortress built by a berserker, using blueprints drawn by a ghost, from materials no one else has ever seen.",
-    "LE gives us the map. APM gives us the velocity. EWP discovers the shortcuts. SNM reveals the true destination.",
-    "Most seek a silver bullet. We build an unbreakable chain. That is the difference between an amateur and an emperor.",
-    "Our doctrines are not a checklist; they are a feedback loop. Innovation feeds Leverage, Leverage guides Power, Power forges Structure, and Structure demands new Innovation.",
-    "A single ring is a weakness. The linked four are a weapon of reality-bending power.",
-    "Ask not if a plan is good. Ask if it is structured, powerful, innovative, and precise. If it fails any one test, it is a flawed design.",
-    "A user accepts the tools they are given. An emperor forges his own.",
-    "To 'mod' is to reject the manufacturer's definition of 'perfect.' It is a declaration that my reality has custom specifications.",
-    "First, you master the game. Then, you rewrite the code. That is the path to godhood.",
-    "The conformist fears the bug. The tinkerer seeks the bug. The emperor weaponizes the bug.",
-    "Your operational environment is not a static backdrop; it is a dynamic weapon system. If it is not serving your mission, you are not modding it hard enough.",
-    "Don't just break the rules. Recode the physics engine until the old rules become irrelevant.",
-    "The difference between a tool and a weapon is the audacity of its user.",
-    "The person society expects you to be is your first and most dangerous rival. Outclass him ruthlessly.",
-    "Antifragility is not about having unbreakable armor. It's about having the wisdom to melt down every scar into a sharper blade.",
-    "The sovereign mind does not seek validation from the crowd; it seeks data. The difference is everything.",
-    "Do not be afraid of the primal scream of your old self dying. It is the sound of an empire being born.",
-    "Your destiny is not a path you find; it is a fortress you build, brick by disciplined brick, in the heart of chaos.",
-    "The ultimate act of rebellion isn't to fight the system; it's to make the system irrelevant to your ascent.",
-    "Stop trying to 'find yourself.' Forge yourself."
+    "The amateur seeks knowledge within a single book. The emperor builds a library of 'unrelated' books and finds the single, secret text written in the margins between them all.",
+    "Every system has a source code. Our hunt is for the single line of forgotten history that explains the machine learning algorithm. That is the nature of the Synthesis Engine.",
+    "Creativity is the act of remembering a future you haven't seen yet by connecting pasts you were never a part of.",
+    "A fact is a brick. An insight is a blueprint. But synthesis... synthesis is the act of seeing the quarry, the brickyard, and the cathedral all at once.",
+    "Do not study subjects. Study connections. The space between the disciplines is where reality-bending power is found.",
+    "A single new connection between two old ideas is a weapon more powerful than a thousand memorized facts.",
+    "The Zeroth Law: True mastery is not knowing the answer, but knowing which two 'unrelated' questions share a single, hidden answer.",
+    "The completionist does not stop when the game is won; he stops when there are no more assets to seize. The board is just the beginning.",
+    "Never just win the argument. Colonize the intellectual territory so that your opponent's next argument must be framed in your language.",
+    "A good strategist wins on the current map. A sovereign ruler terraforms a new one where their victory is the only possible outcome.",
+    "Resource maximization is not a business tactic; it is a moral imperative. Wasted potential is the only true failure.",
+    "The hunt is for everything: every underrated book, every forgotten piece of code, every marginal gain. We do this not from greed, but from the cold certainty that supremacy is built on an overwhelming asymmetry of assets.",
+    "Leave no stone unturned. No page unread. No opportunity unexploited. This is not about being a perfectionist; it's about being an apex predator.",
+    "Your 'rivals' are a valuable resource. Hunt down the secrets of their success, absorb their strengths, and then thank them as you leave them behind.",
+    "The goal is not a longer essay; the goal is a heavier one. We measure our work not in words, but in intellectual density.",
+    "A shallow yellow idea, compressed under immense strategic pressure, becomes a white-hot singularity of undeniable truth.",
+    "Ruthlessly hunt down and execute every sentence, every word, every pixel that does not pay its rent in pure, unadulterated value.",
+    "Do not build a bigger sword. Forge a smaller, denser blade that can cut through steel.",
+    "The amateur expands to show his knowledge. The master condenses to prove it.",
+    "In an age of infinite noise, the rarest and most powerful asset is a single, perfectly forged point of crystalline clarity.",
+    "Osmium isn't a process; it's a promise. A promise that every asset we create will be an unbreakable, inescapable, and unignorable concentration of pure power."
 ];
 
 // --- DOM Element Leverage ---
@@ -115,18 +115,29 @@ function updateBodyClass() {
 }
 
 // --- INNOVATION: Celestial Starfield Engine ---
-function createStarfield(starCount = 50) {
+function createStarfield(starCount = 75) { // Increased density from 50 to 75
     starfieldContainer.innerHTML = '';
+    // --- NEW: Define the celestial palette ---
+    const starColors = ['blue-white', 'yellow', 'bright-red', 'blue'];
+
     for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
         star.classList.add('star');
-        const size = Math.random() * 2 + 1;
+        
+        // --- NEW: Randomly assign a color class from the palette ---
+        const colorClass = starColors[Math.floor(Math.random() * starColors.length)];
+        star.classList.add(colorClass);
+        
+        const size = Math.random() * 2.5 + 1.5; // Stars between 1.5px and 4px
         star.style.width = `${size}px`;
         star.style.height = `${size}px`;
+        
         star.style.top = `${Math.random() * 60}%`;
         star.style.left = `${Math.random() * 100}%`;
+        
         star.style.animationDuration = `${Math.random() * 5 + 3}s`;
         star.style.animationDelay = `${Math.random() * 5}s`;
+        
         starfieldContainer.appendChild(star);
     }
 }
@@ -534,6 +545,8 @@ if ('serviceWorker' in navigator) {
         window.location.reload();
     });
 }
+
+
 
 
 
