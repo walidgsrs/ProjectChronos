@@ -427,6 +427,47 @@ body.fullscreen-active .enter-fullscreen { display: none; }
     #timer-display { flex-direction: column; align-items: center; gap: 0.5rem; }
     .mode-switch label { padding: 6px 18px; font-size: 0.8rem; }
 }
+/* --- NEW: Update Notification Styling --- */
+#update-notification {
+    position: fixed;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200; /* Above all other elements */
+    background-color: #ffd700; /* A potent, attention-grabbing gold */
+    color: #050507;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-family: 'Barlow Condensed', sans-serif; /* Use Barlow for UI clarity */
+    font-weight: 700;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) translateX(-50%);
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+#update-notification.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) translateX(-50%);
+}
+#reload-button {
+    background: #050507;
+    color: #ffd700;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+#reload-button:active {
+    transform: scale(0.95);
+}
 /* --- NEW: Post-Sprint Debriefing System --- */
 #post-sprint-overlay {
     position: fixed;
@@ -605,6 +646,7 @@ body.fullscreen-active .enter-fullscreen { display: none; }
 #task-name-container.editing #task-name-input {
     display: block;
 }
+
 
 
 
