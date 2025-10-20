@@ -54,6 +54,13 @@
                 <div id="time-value" data-old-value=""></div> 
                 <span id="time-unit"></span>
             </div>
+<!-- NEW: The "Momentum Bar" Armature -->
+            <div id="sprint-progress-bar-container">
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill"></div>
+                </div>
+                <div class="progress-percentage">0%</div>
+            </div>
             <div id="target-date-display"></div>
             <!-- ADD THIS LINE TO RESTORE THE MISSION PROMPT -->
             <div id="mission-prompt">Start your mission now!</div>
@@ -61,6 +68,63 @@
             <div id="adrenaline-prompt">There is no time to waste.</div>
         </div>
     </main>
+
+
+    <!-- NEW: The AEGIS Mission Dossier Interface (Hidden by Default) -->
+    <div id="aegis-dossier-overlay">
+        <div class="dossier-form">
+            <h1>Mission Dossier</h1>
+            
+            <div class="dossier-field">
+                <label for="objective-name">Objective Designator:</label>
+                <input type="text" id="objective-name" autocomplete="off">
+            </div>
+
+            <div class="dossier-field-group">
+                <div class="dossier-field">
+                    <label>Objective Class:</label>
+                    <div class="aegis-toggle">
+                        <input type="radio" id="class-strategic" name="objective-class" value="strategic" checked>
+                        <label for="class-strategic">Strategic</label>
+                        <input type="radio" id="class-tactical" name="objective-class" value="tactical">
+                        <label for="class-tactical">Tactical</label>
+                    </div>
+                </div>
+                <div class="dossier-field">
+                    <label for="event-horizon">Event Horizon:</label>
+                    <input type="date" id="event-horizon">
+                </div>
+            </div>
+
+            <div class="dossier-field">
+                <label>Scale:</label>
+                <div class="aegis-chips">
+                    <input type="radio" id="scale-epic" name="objective-scale" value="epic" checked><label for="scale-epic">Epic</label>
+                    <input type="radio" id="scale-feature" name="objective-scale" value="feature"><label for="scale-feature">Feature</label>
+                    <input type="radio" id="scale-task" name="objective-scale" value="task"><label for="scale-task">Task</label>
+                </div>
+            </div>
+
+            <div class="dossier-field">
+                <label>Narrative Frame:</label>
+                <div class="aegis-chips">
+                    <input type="radio" id="frame-main" name="narrative-frame" value="main" checked><label for="frame-main">Main Quest</label>
+                    <input type="radio" id="frame-side" name="narrative-frame" value="side"><label for="frame-side">Side Quest</label>
+                    <input type="radio" id="frame-recon" name="narrative-frame" value="recon"><label for="frame-recon">Recon</label>
+                </div>
+            </div>
+
+            <div class="dossier-field">
+                <label for="dossier-intel">Dossier Intel:</label>
+                <textarea id="dossier-intel" rows="5" placeholder="Outline mission plan, desired outcome, and relevant asset links..."></textarea>
+            </div>
+
+            <div class="dossier-actions">
+                <button id="abort-dossier-button">Abort</button>
+                <button id="forge-mission-button">Forge Mission</button>
+            </div>
+        </div>
+    </div>
 
     <div class="mode-switch">
         <input type="radio" id="mode-home" name="mode" value="home" checked>
@@ -90,6 +154,14 @@
         <button id="complete-sprint-button">Mark as Complete [SHIFT+F]</button>
     </div>
 
+    <!-- NEW: The Gateway to AEGIS -->
+    <button id="log-objective-button">+ Log New Objective</button>
+
+    <!-- NEW: The Osmium Blade (PiP) Control -->
+    <button id="pip-toggle" title="Toggle Osmium Blade">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 11h-8v6h8v-6zm4 8V4.98C23 3.88 22.1 3 21 3H3c-1.1 0-2 .88-2 1.98V19c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2zm-2 .02H3V4.97h18v14.05z"/></svg>
+    </button>
+
     <div id="fullscreen-toggle" title="Toggle Fullscreen">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path class="enter-fullscreen" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 2h-2v3h-3v2h5v-5zm-3-2V5h-2v2h-3v2h5z"/>
@@ -102,6 +174,10 @@
         <!-- NEW: Container for the progress report -->
         <p id="sprint-progress-display"></p>
     </div>
+<!-- NEW: The Canvas Gateway for the Osmium Blade -->
+    <canvas id="pip-canvas" style="display: none;"></canvas>
+    <!-- RE-FORGED: The hidden Video Conduit -->
+    <video id="pip-video" muted autoplay style="display: none;"></video>
     <script src="script.js"></script>
     <!-- NEW: The Update Notification System -->
     <div id="update-notification">
@@ -110,6 +186,7 @@
     </div>
 </body>
 </html>
+
 
 
 
