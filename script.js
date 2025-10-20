@@ -14,8 +14,10 @@ const flowRippleAudio = new Audio('Dash.mp3');
 const cancelSprintAudio = new Audio('Death.mp3');
 const completeSprintAudio = new Audio('highscore.wav');
 const endSprintAudio = new Audio('Drop.mp3');
+const logObjectiveAudio = new Audio('Select.mp3');
+const forgeMissionAudio = new Audio('HighScore.mp3');
 
-[pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio].forEach(audio => audio.volume = 1.0);
+[pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio, logObjectiveAudio, forgeMissionAudio].forEach(audio => audio.volume = 1.0);
 
 // --- The EψM Doctrine Data Store ---
 const BRUNNIAN_QUOTES = [
@@ -75,6 +77,17 @@ const taskNameContainer = document.getElementById('task-name-container');
 const taskNameDisplay = document.getElementById('task-name');
 const taskNameInput = document.getElementById('task-name-input');
 const editTaskNameButton = document.getElementById('edit-task-name-button');
+// --- AEGIS Brick #1 Levers ---
+const logObjectiveButton = document.getElementById('log-objective-button');
+const aegisDossierOverlay = document.getElementById('aegis-dossier-overlay');
+const objectiveNameInput = document.getElementById('objective-name');
+const forgeMissionButton = document.getElementById('forge-mission-button');
+const abortDossierButton = document.getElementById('abort-dossier-button');
+const progressBarFill = document.querySelector('.progress-bar-fill');
+const progressPercentage = document.querySelector('.progress-percentage');
+const pipToggleButton = document.getElementById('pip-toggle');
+const pipCanvas = document.getElementById('pip-canvas');
+const pipCtx = pipCanvas.getContext('2d');
 
 // --- System State Variables ---
 let currentMode = 'home';
@@ -84,6 +97,10 @@ let animationTimeout, rippleTimeout, masterInterval;
 let flowStateAnimationId, digitFlashTimeoutId, quoteInterval;
 let flashIndex = -1, quoteIndex = 0;
 let sprintInitialDuration, sprintEndTime, adrenalinePhaseTriggered = false;
+// --- NEW: Celestial Corruption State ---
+let starElements = [];
+let corruptionInterval;
+let corruptionStartTimeout; // NEW: The temporal trigger for corruption
 let sprintGoal = 0;
 let sprintsCompleted = 0;
 let isDebriefingActive = false; // NEW: Gatekeeper for post-sprint feedback
@@ -115,10 +132,11 @@ function updateBodyClass() {
 }
 
 // --- INNOVATION: Celestial Starfield Engine ---
-function createStarfield(starCount = 75) { // Increased density from 50 to 75
+function createStarfield(starCount = 170) { // Recalibrated: 55 stars for optimal performance
+    starElements = []; // Reset the star array
     starfieldContainer.innerHTML = '';
     // --- NEW: Define the celestial palette ---
-    const starColors = ['blue-white', 'yellow', 'bright-red', 'blue'];
+const starColors = ['blue-white', 'yellow', 'blue', 'white', 'yellow-white', 'orange'];
 
     for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
@@ -128,7 +146,7 @@ function createStarfield(starCount = 75) { // Increased density from 50 to 75
         const colorClass = starColors[Math.floor(Math.random() * starColors.length)];
         star.classList.add(colorClass);
         
-        const size = Math.random() * 2.5 + 1.5; // Stars between 1.5px and 4px
+        const size = Math.random() * 1.5 + 0.5; // Re-calibrated: Stars between 0.5px and 2px
         star.style.width = `${size}px`;
         star.style.height = `${size}px`;
         
@@ -139,11 +157,13 @@ function createStarfield(starCount = 75) { // Increased density from 50 to 75
         star.style.animationDelay = `${Math.random() * 5}s`;
         
         starfieldContainer.appendChild(star);
+        starElements.push(star); // Add the forged star to our command list
     }
 }
 
 function destroyStarfield() {
     starfieldContainer.innerHTML = '';
+    starElements = []; // Purge the command list
 }
 
 // --- Flow State & Motivational Engines ---
@@ -223,20 +243,49 @@ function launchSprint() {
     // Set default task name for new sprint
     currentTaskName = "Tactical Sprint";
     taskNameDisplay.textContent = currentTaskName;
+// Reset Momentum Bar
+    progressBarFill.style.width = '0%';
+    progressPercentage.style.left = '0%';
+    progressPercentage.textContent = '0%';
     isSprintActive = true;
     sprintInitialDuration = durationMinutes * 60 * 1000;
     sprintEndTime = Date.now() + sprintInitialDuration;
     adrenalinePhaseTriggered = false;
     updateBodyClass();
-    startFlowStateAesthetics();
+startFlowStateAesthetics();
     startDigitFlasher();
     startQuoteCycler();
     createStarfield();
+
+// --- RE-FORGED: The Delayed Corruption Protocol ---
+    if (corruptionInterval) clearInterval(corruptionInterval);
+    if (corruptionStartTimeout) clearTimeout(corruptionStartTimeout);
+
+    // 1. The corruption window is now between 25% and 75% of the sprint (a 50% window).
+    const corruptionWindow = sprintInitialDuration * 0.50;
+    const corruptionPeriod = corruptionWindow / (starElements.length || 1);
+    const corruptionDelay = sprintInitialDuration * 0.25; // The delay before corruption begins.
+    let starsToCorrupt = [...starElements];
+
+    // 2. Schedule the corruption sequence to begin after the delay.
+    corruptionStartTimeout = setTimeout(() => {
+        // 3. Once started, corrupt stars at the new, compressed cadence.
+        corruptionInterval = setInterval(() => {
+            if (starsToCorrupt.length > 0) {
+                const starToCorrupt = starsToCorrupt.shift();
+                starToCorrupt.classList.add('corrupted');
+            } else {
+                clearInterval(corruptionInterval);
+            }
+        }, corruptionPeriod);
+    }, corruptionDelay);
+
     updateDisplay();
 }
 
 function endSprint(reason = 'timeout') {
     if (!isSprintActive) return;
+    if (document.pictureInPictureElement) document.exitPictureInPicture(); // Auto-close PiP on sprint end
     isSprintActive = false;
     clearInterval(masterInterval);
     isDebriefingActive = true;
@@ -280,10 +329,12 @@ function endSprint(reason = 'timeout') {
 
     setTimeout(() => {
         postSprintOverlay.classList.remove('visible');
-        stopFlowStateAesthetics();
-        stopDigitFlasher();
-        stopQuoteCycler();
-        destroyStarfield();
+stopFlowStateAesthetics();
+    stopDigitFlasher();
+    stopQuoteCycler();
+    destroyStarfield(); // This now correctly handles the star array
+clearTimeout(corruptionStartTimeout); // Purge the pending corruption start
+    clearInterval(corruptionInterval); // Terminate the corruption protocol
         flowQuoteDisplay.classList.remove('visible');
         sublimatedMacroValue.textContent = '';
         sublimatedMacroUnit.textContent = '';
@@ -325,13 +376,26 @@ function updateDisplay() {
     let newValue;
 
     if (isSprintActive) {
+    // --- NEW: Momentum Bar Engine ---
+        const elapsedTime = now.getTime() - (sprintEndTime - sprintInitialDuration);
+        let progress = (elapsedTime / sprintInitialDuration) * 100;
+        progress = Math.min(100, Math.max(0, progress)); // Clamp between 0 and 100
+
+        progressBarFill.style.width = `${progress}%`;
+        progressPercentage.style.left = `${progress}%`;
+        progressPercentage.textContent = `${Math.floor(progress)}%`;
         const timeLeft = sprintEndTime - now.getTime();
-        if (!adrenalinePhaseTriggered && timeLeft <= sprintInitialDuration * 0.25) {
+if (!adrenalinePhaseTriggered && timeLeft <= sprintInitialDuration * 0.25) {
             adrenalinePhaseTriggered = true;
             stopFlowStateAesthetics();
             stopDigitFlasher();
             stopQuoteCycler();
-            destroyStarfield();
+clearTimeout(corruptionStartTimeout); // Purge the pending corruption start
+            clearInterval(corruptionInterval); // Cease the gradual corruption
+
+            // --- NEW: The Adrenaline Climax - Corrupt all remaining stars instantly ---
+            starElements.forEach(star => star.classList.add('corrupted'));
+            
             updateBodyClass();
             adrenalineStartAudio.currentTime = 0;
             adrenalineStartAudio.play().catch(e => {});
@@ -355,6 +419,8 @@ function updateDisplay() {
                 triggerKineticFeedback(oldValue);
             }
         }
+        // --- NEW: Real-time rendering command for the Osmium Blade ---
+        if (document.pictureInPictureElement) drawOsmiumBlade();
     } else {
         switch (currentMode) {
             case 'home':
@@ -397,6 +463,8 @@ function handleHotkeys(event) {
         }
     } else if (currentMode === 'tactical' && event.key === 'Enter') {
         if (document.activeElement === sprintDurationInput) launchSprint();
+    } else if (aegisDossierOverlay.classList.contains('visible') && event.key === 'Escape') {
+        closeDossier();
     }
 }
 function toggleFullscreen() {
@@ -410,6 +478,96 @@ function toggleFullscreen() {
     }
 }
 function updateFullscreenIcon() { updateBodyClass(); }
+// --- INNOVATION: The Osmium Blade Rendering Engine ---
+function drawOsmiumBlade() {
+    // Set canvas dimensions
+    pipCanvas.width = 400;
+    pipCanvas.height = 225;
+
+    // Background
+    pipCtx.fillStyle = '#050507';
+    pipCtx.fillRect(0, 0, pipCanvas.width, pipCanvas.height);
+
+    // Task Name
+    pipCtx.font = '700 24px "ITC Kabel Std", sans-serif';
+    pipCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    pipCtx.textAlign = 'center';
+    pipCtx.fillText(currentTaskName, pipCanvas.width / 2, 60);
+
+    // Sprint Timer
+    pipCtx.font = '900 80px "ITC Kabel Std", sans-serif';
+    pipCtx.fillStyle = '#ffffff';
+    pipCtx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+    pipCtx.shadowBlur = 15;
+    pipCtx.fillText(timeValueDisplay.textContent.replace('❖',':'), pipCanvas.width / 2, 150);
+    pipCtx.shadowBlur = 0; // Reset shadow
+
+    // "SPRINT" unit
+    pipCtx.font = '400 20px "ITC Kabel Std", sans-serif';
+    pipCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    // Manual positioning is required as text width varies
+    const timerWidth = pipCtx.measureText(timeValueDisplay.textContent).width;
+    pipCtx.textAlign = 'left';
+    pipCtx.fillText("SPRINT", (pipCanvas.width / 2) + (timerWidth / 1.5), 150);
+}
+
+// --- INNOVATION: The Osmium Blade Command Interface ---
+async function toggleOsmiumBlade() {
+    if (!isSprintActive) return; // Only available during a sprint
+
+    try {
+        if (document.pictureInPictureElement) {
+            await document.exitPictureInPicture();
+        } else {
+            drawOsmiumBlade(); // Initial draw before requesting
+            await pipCanvas.requestPictureInPicture();
+        }
+    } catch (error) {
+        console.error("Osmium Blade deployment failed:", error);
+    }
+}
+
+// --- AEGIS Command Functions ---
+function openDossier() {
+    logObjectiveAudio.currentTime = 0;
+    logObjectiveAudio.play().catch(e => {});
+    aegisDossierOverlay.classList.add('visible');
+    objectiveNameInput.focus(); // Immediately focus the primary input
+    validateDossier(); // Run validation on open
+}
+
+function closeDossier() {
+    aegisDossierOverlay.classList.remove('visible');
+    // Optional: Reset form on close
+    aegisDossierOverlay.querySelector('.dossier-form').reset();
+}
+
+function validateDossier() {
+    // A mission without a name is not a mission.
+    const hasName = objectiveNameInput.value.trim() !== '';
+    forgeMissionButton.disabled = !hasName;
+}
+
+function forgeMission() {
+    const missionData = {
+        name: objectiveNameInput.value.trim(),
+        class: document.querySelector('input[name="objective-class"]:checked').value,
+        scale: document.querySelector('input[name="objective-scale"]:checked').value,
+        frame: document.querySelector('input[name="narrative-frame"]:checked').value,
+        horizon: document.getElementById('event-horizon').value,
+        intel: document.getElementById('dossier-intel').value,
+        timestamp: new Date().toISOString()
+    };
+
+    console.log("Mission Forged:", missionData);
+
+    // --- PRESERVED DIRECTIVE: The auditory pulse remains ---
+    forgeMissionAudio.currentTime = 0;
+    forgeMissionAudio.play().catch(e => {});
+    
+    // The function now returns to its pure, stable state.
+    closeDossier();
+}
 
 // --- RE-FORGED: Streamlined Persistence Engine (localStorage only) ---
 function saveStateToStorage() {
@@ -449,8 +607,9 @@ async function initializeDashboard() {
     targetDateDisplay.textContent = targetText;
     sublimatedTargetDate.textContent = targetText;
     
-    modeSwitches.forEach(sw => sw.addEventListener('change', () => setMode(sw.value)));
-    fullscreenToggle.addEventListener('click', toggleFullscreen);
+modeSwitches.forEach(sw => sw.addEventListener('change', () => setMode(sw.value)));
+    fullscreenToggle.addEventListener('click', toggleFullscreen); // THIS LINE IS RESTORED
+    pipToggleButton.addEventListener('click', toggleOsmiumBlade);
     launchSprintButton.addEventListener('click', launchSprint);
     cancelSprintButton.addEventListener('click', () => endSprint('cancelled'));
     completeSprintButton.addEventListener('click', () => endSprint('completed'));
@@ -476,7 +635,15 @@ async function initializeDashboard() {
     });
     document.addEventListener('fullscreenchange', updateFullscreenIcon);
     document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
+    pipCanvas.addEventListener('enterpictureinpicture', () => bodyElement.classList.add('pip-active'));
+    pipCanvas.addEventListener('leavepictureinpicture', () => bodyElement.classList.remove('pip-active'));
     document.addEventListener('keydown', handleHotkeys);
+    // --- AEGIS Listeners ---
+    logObjectiveButton.addEventListener('click', openDossier);
+    abortDossierButton.addEventListener('click', closeDossier);
+    forgeMissionButton.addEventListener('click', forgeMission);
+    objectiveNameInput.addEventListener('input', validateDossier); // Real-time validation
+    
     
     goalDecrement.addEventListener('click', () => {
         sprintGoalInput.stepDown();
@@ -503,7 +670,7 @@ async function initializeDashboard() {
     loadStateFromStorage(); // Corrected function call
     
     document.body.addEventListener('click', () => { 
-        [pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio].forEach(a => a.load());
+[pulseAudio, strategicRippleAudio, tacticalRippleAudio, sprintStartAudio, adrenalineStartAudio, flowRippleAudio, cancelSprintAudio, completeSprintAudio, endSprintAudio, logObjectiveAudio, forgeMissionAudio].forEach(a => a.load());
     }, { once: true });
     
     updateDisplay();
@@ -545,8 +712,6 @@ if ('serviceWorker' in navigator) {
         window.location.reload();
     });
 }
-
-
 
 
 
