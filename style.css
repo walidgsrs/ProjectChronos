@@ -62,12 +62,12 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -2; /* Positioned behind the gradient overlays */
+    z-index: 1; /* CORRECTED: Stars are now in the foreground of the background */
     opacity: 0;
     visibility: hidden;
     transition: opacity 1.5s ease-in-out;
 }
-.flow-state #starfield-container {
+.sprint-active #starfield-container {
     opacity: 1;
     visibility: visible;
 }
@@ -80,7 +80,7 @@ body {
     animation-iteration-count: infinite;
 }
 
-/* --- NEW: Forged Celestial Palette --- */
+/* --- RE-FORGED: Expanded Celestial Palette --- */
 .star.blue-white {
     background-color: #cad8ff;
     box-shadow: 0 0 8px 2px #cad8ff;
@@ -89,13 +89,30 @@ body {
     background-color: #fff2a1;
     box-shadow: 0 0 10px 3px #fff2a1;
 }
-.star.bright-red {
-    background-color: #ffadad;
-    box-shadow: 0 0 9px 2px #ffadad;
-}
 .star.blue {
     background-color: #a1c4ff;
     box-shadow: 0 0 8px 2px #a1c4ff;
+}
+/* --- NEW: The Forged Warm Spectrum --- */
+.star.white {
+    background-color: #ffffff;
+    box-shadow: 0 0 7px 2px #ffffff;
+}
+.star.yellow-white {
+    background-color: #fffbe1;
+    box-shadow: 0 0 9px 2px #fffbe1;
+}
+.star.orange {
+    background-color: #ffb74d; /* A richer, more saturated orange */
+    /* A multi-layered, more luminous glow for a supergiant effect */
+    box-shadow: 0 0 4px 2px #ffb74d, 
+                0 0 12px 4px rgba(255, 183, 77, 0.7), 
+                0 0 25px 6px rgba(255, 152, 0, 0.5);
+}
+/* --- NEW: The "Corrupted" Star State --- */
+.star.corrupted {
+    background-color: #ff0033; /* A brighter, more luminous crimson for maximum urgency */
+    box-shadow: 0 0 4px 2px #ff0033, 0 0 12px 4px rgba(255, 0, 51, 0.5); /* Enhanced glow */
 }
 
 
@@ -111,20 +128,21 @@ body::after { background-image: linear-gradient(to top, #050507 85%, rgba(99, 15
 .strategic-mode::before, .tactical-mode::after { opacity: 1; }
 
 .flow-state::after {
-    /* --- RE-FORGED with balanced, vibrant jewel tones --- */
-    background-image: linear-gradient(-45deg, #1a0433, #3a125e, #006f7f, #1a0433);
+    /* --- RE-FORGED: Transmuted to a Twilight Abyss palette for maximum contrast --- */
+    background-image: linear-gradient(-45deg, #0d021f, #1c0b2e, #0b192e, #0d021f);
     background-size: 400% 400%;
     animation: flow-gradient 30s ease infinite;
-    -webkit-mask-image: linear-gradient(to top, transparent 40%, black 100%);
-    mask-image: linear-gradient(to top, transparent 40%, black 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 40%, black 100%);
+    mask-image: linear-gradient(to bottom, transparent 40%, black 100%);
 }
 .adrenaline-phase::after {
     opacity: 1;
     background-image: linear-gradient(-45deg, #6d0000, #ff0033, #d40000, #6d0000);
     background-size: 400% 400%;
     animation: adrenaline-pulse 8s ease infinite;
-    -webkit-mask-image: linear-gradient(to top, transparent 30%, black 100%);
-    mask-image: linear-gradient(to top, transparent 30%, black 100%);
+    /* --- RE-FORGED: Mask inverted to create a rising tide of urgency --- */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 30%, black 100%);
+    mask-image: linear-gradient(to bottom, transparent 30%, black 100%);
 }
 
 header {
@@ -256,6 +274,64 @@ header {
     opacity: 0; /* Hidden by default */
     transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
 }
+/* --- NEW: Momentum Bar Styling --- */
+#sprint-progress-bar-container {
+    position: relative;
+    width: 60%;
+    max-width: 500px;
+    margin-top: 1.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s ease;
+    max-height: 0;
+}
+.sprint-active #sprint-progress-bar-container {
+    opacity: 1;
+    visibility: visible;
+    max-height: 100px;
+}
+.progress-bar-track {
+    width: 100%;
+    height: 8px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden; /* Contains the fill */
+}
+.progress-bar-fill {
+    height: 100%;
+    width: 0; /* Commanded by JS */
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 0 8px #ffffff, 0 0 16px rgba(255, 255, 255, 0.7);
+    position: relative;
+    transition: width 0.5s linear; /* Smooth fill animation */
+}
+/* The Arrow Tip */
+.progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 12px solid #ffffff; /* This creates the arrow shape */
+    filter: drop-shadow(0 0 3px #ffffff); /* Make the arrow glow */
+}
+.progress-percentage {
+    position: absolute;
+    top: 1.5rem; /* Positioned below the bar */
+    left: 0; /* Commanded by JS */
+    transform: translateX(-50%);
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+    transition: left 0.5s linear;
+}
 
 /* Make it visible in Strategic and Tactical Standby modes */
 .strategic-mode #target-date-display,
@@ -313,7 +389,11 @@ header {
 #sprint-prompt { font-weight: 700; color: rgba(255,255,255,0.7); }
 .sprint-input-group { display: flex; gap: 0.75rem; align-items: center; }
 
-.tactical-mode:not(.sprint-active) .mode-switch { bottom: 8rem; }
+/* --- RE-FORGED: Unified displacement logic for bottom controls --- */
+.strategic-mode .mode-switch,
+.tactical-mode:not(.sprint-active) .mode-switch {
+    bottom: 8rem; /* Move the switch up to make room for context-specific controls */
+}
 .tactical-mode:not(.sprint-active) #sprint-setup {
     opacity: 1; transform: translateY(0) translateX(-50%);
     visibility: visible; pointer-events: auto;
@@ -418,6 +498,59 @@ input[type=number] {
 
 .sprint-active .mode-switch, .sprint-active #sprint-setup {
     opacity: 0; visibility: hidden; pointer-events: none;
+}
+
+#pip-toggle {
+    position: absolute;
+    right: 5.5rem; /* Positioned next to the fullscreen button */
+    bottom: 2.5rem;
+    z-index: 3;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    background-color: #0A0A0C;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5), 0 0 20px rgba(0,0,0,0.5);
+    /* --- NEW: The button is now a ghost by default --- */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.5s ease;
+}
+
+/* --- NEW: The button only materializes when its power is available --- */
+.sprint-active #pip-toggle {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+#pip-toggle:hover {
+    background-color: rgba(30, 30, 32, 0.8);
+}
+#pip-toggle svg {
+    width: 20px;
+    height: 20px;
+    fill: rgba(255, 255, 255, 0.5);
+    transition: fill 0.3s ease;
+}
+#pip-toggle:hover svg {
+    fill: rgba(255, 255, 255, 0.8);
+}
+
+/* --- NEW: Style adjustments when the Osmium Blade is active --- */
+.pip-active #flow-quote-display,
+.pip-active #adrenaline-prompt,
+.pip-active #sprint-controls,
+.pip-active .mode-switch,
+.pip-active #fullscreen-toggle,
+.pip-active #pip-toggle {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
 }
 
 #fullscreen-toggle {
@@ -602,6 +735,264 @@ body.fullscreen-active .enter-fullscreen { display: none; }
         left: 1.5rem;
     }
 }
+/* ---
+   AEGIS INTERFACE SYSTEMS
+--- */
+
+/* --- The Gateway Button --- */
+#log-objective-button {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5; /* Above other bottom controls */
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: 'ITC Kabel Std', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 10px 24px;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Visibility is commanded by the operational mode */
+.strategic-mode #log-objective-button {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+#log-objective-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #ffffff;
+}
+
+/* --- The Dossier Overlay --- */
+#aegis-dossier-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 150; /* Above all other content */
+    background-color: rgba(5, 5, 7, 0.5);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.5s ease, visibility 0.5s;
+}
+
+#aegis-dossier-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.dossier-form {
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background-color: rgba(10, 10, 12, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    transform: scale(0.95);
+    transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+/* ---
+   FORGED SCROLLBAR: Aethesi Standard
+--- */
+
+/* This targets the scrollbar specifically within the Dossier for WebKit browsers (Chrome, Safari, Edge) */
+.dossier-form::-webkit-scrollbar {
+    width: 10px; /* The chassis of the scrollbar */
+}
+
+.dossier-form::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3); /* The dark, unobtrusive pathway */
+    border-radius: 10px;
+}
+
+.dossier-form::-webkit-scrollbar-thumb {
+    background-color: #4c1d95; /* The core Aethesi purple */
+    border-radius: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.3); /* Creates a defined, inset look */
+    box-shadow: 0 0 8px rgba(192, 132, 252, 0.5); /* A subtle, potent glow */
+}
+
+.dossier-form::-webkit-scrollbar-thumb:hover {
+    background-color: #6a0dad; /* A more vibrant purple on interaction */
+    box-shadow: 0 0 12px rgba(192, 132, 252, 0.8);
+}
+
+/* For Firefox, the syntax is different but the principle is the same: absolute control. */
+.dossier-form {
+    scrollbar-width: thin;
+    scrollbar-color: #4c1d95 rgba(0, 0, 0, 0.3);
+}
+
+#aegis-dossier-overlay.visible .dossier-form {
+    transform: scale(1);
+}
+
+.dossier-form h1 {
+    font-size: 2rem;
+    font-weight: 900;
+    text-align: left;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+
+.dossier-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: left;
+}
+
+.dossier-field-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.dossier-field label {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.dossier-form input[type="text"],
+.dossier-form input[type="date"],
+.dossier-form textarea {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #ffffff;
+    font-family: 'ITC Kabel Std', sans-serif;
+    font-size: 1rem;
+    padding: 12px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.dossier-form input[type="text"]:focus,
+.dossier-form input[type="date"]:focus,
+.dossier-form textarea:focus {
+    border-color: #c084fc;
+    box-shadow: 0 0 10px rgba(192, 132, 252, 0.3);
+}
+
+.dossier-form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* --- Custom Toggle and Chip Inputs --- */
+.aegis-toggle {
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.aegis-toggle input { display: none; }
+.aegis-toggle label {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.aegis-toggle input:checked + label {
+    background-color: #4c1d95;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.aegis-chips {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.aegis-chips input { display: none; }
+.aegis-chips label {
+    padding: 8px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.aegis-chips input:checked + label {
+    background-color: #4c1d95;
+    border-color: #4c1d95;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+/* --- Action Buttons --- */
+.dossier-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+#abort-dossier-button, #forge-mission-button {
+    font-family: 'ITC Kabel Std', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 10px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+#abort-dossier-button {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.7);
+}
+#abort-dossier-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+#forge-mission-button {
+    background-color: #c084fc;
+    border: 1px solid #c084fc;
+    color: #050507;
+}
+#forge-mission-button:hover {
+    background-color: #d8b4fe;
+    border-color: #d8b4fe;
+}
+#forge-mission-button:disabled {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+    cursor: not-allowed;
+}
 /* --- NEW: Mission Designator Styling --- */
 #task-name-container {
     display: flex;
@@ -662,7 +1053,7 @@ body.fullscreen-active .enter-fullscreen { display: none; }
 }
 #task-name-container.editing #task-name-input {
     display: block;
-}
+}   
 
 
 
