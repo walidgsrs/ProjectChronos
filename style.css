@@ -301,11 +301,13 @@ header {
 .progress-bar-fill {
     height: 100%;
     width: 0; /* Commanded by JS */
-    background-color: #ffffff;
+    /* RE-FORGED: Color is now a variable commanded by the engine */
+    background-color: var(--progress-bar-color, #ffffff);
     border-radius: 8px;
-    box-shadow: 0 0 8px #ffffff, 0 0 16px rgba(255, 255, 255, 0.7);
+    box-shadow: var(--progress-bar-shadow, 0 0 8px #ffffff);
     position: relative;
-    transition: width 0.5s linear; /* Smooth fill animation */
+    /* RE-FORGED: Transition now includes color for smooth stage shifts */
+    transition: width 0.5s linear, background-color 0.5s ease, box-shadow 0.5s ease;
 }
 /* The Arrow Tip */
 .progress-bar-fill::after {
@@ -318,8 +320,11 @@ header {
     height: 0;
     border-top: 8px solid transparent;
     border-bottom: 8px solid transparent;
-    border-left: 12px solid #ffffff; /* This creates the arrow shape */
-    filter: drop-shadow(0 0 3px #ffffff); /* Make the arrow glow */
+    /* RE-FORGED: Arrow color is also a variable */
+    border-left: 12px solid var(--progress-bar-color, #ffffff);
+    filter: drop-shadow(0 0 3px var(--progress-bar-color, #ffffff));
+    /* RE-FORGED: Transition for arrow color */
+    transition: border-left-color 0.5s ease, filter 0.5s ease;
 }
 .progress-percentage {
     position: absolute;
@@ -330,7 +335,8 @@ header {
     font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.8);
     text-shadow: 0 0 5px rgba(0,0,0,0.5);
-    transition: left 0.5s linear;
+    /* RE-FORGED: The transition now includes color for smooth interpolation */
+    transition: left 0.5s linear, color 0.5s ease;
 }
 
 /* Make it visible in Strategic and Tactical Standby modes */
@@ -500,57 +506,19 @@ input[type=number] {
     opacity: 0; visibility: hidden; pointer-events: none;
 }
 
-#pip-toggle {
-    position: absolute;
-    right: 5.5rem; /* Positioned next to the fullscreen button */
-    bottom: 2.5rem;
-    z-index: 3;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    background-color: #0A0A0C;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.5), 0 0 20px rgba(0,0,0,0.5);
-    /* --- NEW: The button is now a ghost by default --- */
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: all 0.5s ease;
-}
-
-/* --- NEW: The button only materializes when its power is available --- */
-.sprint-active #pip-toggle {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-}
-#pip-toggle:hover {
+#miniplayer-toggle:hover {
     background-color: rgba(30, 30, 32, 0.8);
 }
-#pip-toggle svg {
+
+#miniplayer-toggle svg {
     width: 20px;
     height: 20px;
     fill: rgba(255, 255, 255, 0.5);
     transition: fill 0.3s ease;
 }
-#pip-toggle:hover svg {
-    fill: rgba(255, 255, 255, 0.8);
-}
 
-/* --- NEW: Style adjustments when the Osmium Blade is active --- */
-.pip-active #flow-quote-display,
-.pip-active #adrenaline-prompt,
-.pip-active #sprint-controls,
-.pip-active .mode-switch,
-.pip-active #fullscreen-toggle,
-.pip-active #pip-toggle {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
+#miniplayer-toggle:hover svg {
+    fill: rgba(255, 255, 255, 0.8);
 }
 
 #fullscreen-toggle {
@@ -1054,6 +1022,7 @@ body.fullscreen-active .enter-fullscreen { display: none; }
 #task-name-container.editing #task-name-input {
     display: block;
 }   
+
 
 
 
