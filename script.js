@@ -85,9 +85,6 @@ const forgeMissionButton = document.getElementById('forge-mission-button');
 const abortDossierButton = document.getElementById('abort-dossier-button');
 const progressBarFill = document.querySelector('.progress-bar-fill');
 const progressPercentage = document.querySelector('.progress-percentage');
-const pipToggleButton = document.getElementById('pip-toggle');
-const pipCanvas = document.getElementById('pip-canvas');
-const pipCtx = pipCanvas.getContext('2d');
 
 // --- System State Variables ---
 let currentMode = 'home';
@@ -118,6 +115,7 @@ function setMode(newMode) {
 function updateBodyClass() {
     bodyElement.className = '';
     bodyElement.classList.add(`${currentMode}-mode`);
+
     if (document.fullscreenElement || document.webkitFullscreenElement) {
         bodyElement.classList.add('fullscreen-active');
     }
@@ -285,9 +283,8 @@ startFlowStateAesthetics();
 
 function endSprint(reason = 'timeout') {
     if (!isSprintActive) return;
-    if (document.pictureInPictureElement) document.exitPictureInPicture(); // Auto-close PiP on sprint end
     isSprintActive = false;
-    clearInterval(masterInterval);
+    masterInterval = setInterval(updateDisplay, 1000);
     isDebriefingActive = true;
 
     // --- Debriefing Protocol ---
@@ -376,14 +373,58 @@ function updateDisplay() {
     let newValue;
 
     if (isSprintActive) {
-    // --- NEW: Momentum Bar Engine ---
+// --- RE-FORGED: The Multi-Stage Pressure Gauge Engine ---
         const elapsedTime = now.getTime() - (sprintEndTime - sprintInitialDuration);
         let progress = (elapsedTime / sprintInitialDuration) * 100;
-        progress = Math.min(100, Math.max(0, progress)); // Clamp between 0 and 100
+        progress = Math.min(100, Math.max(0, progress));
 
         progressBarFill.style.width = `${progress}%`;
         progressPercentage.style.left = `${progress}%`;
         progressPercentage.textContent = `${Math.floor(progress)}%`;
+
+        // --- NEW: Multi-Stage Color Calculation ---
+        let barColor, barShadow, textColor;
+
+        if (progress < 25) {
+            // Stage 1: Purity
+            barColor = '#ffffff';
+            barShadow = '0 0 8px #ffffff, 0 0 16px rgba(255, 255, 255, 0.7)';
+            textColor = 'rgba(255, 255, 255, 0.8)';
+        } else if (progress < 50) {
+            // Stage 2: Caution
+            barColor = '#FFD700'; // Gold/Yellow
+            barShadow = '0 0 8px #FFD700, 0 0 16px rgba(255, 215, 0, 0.7)';
+            textColor = '#FFD700';
+        } else if (progress < 75) {
+            // Stage 3: Warning
+            barColor = '#ff9800'; // Orange
+            barShadow = '0 0 10px #ff9800, 0 0 20px rgba(255, 152, 0, 0.7)';
+            textColor = '#ff9800';
+        } else { // progress >= 75
+            // Stage 4: Urgency
+            barColor = '#ff0033'; // Adrenaline Red
+            barShadow = '0 0 12px #ff0033, 0 0 25px rgba(255, 0, 51, 0.7)';
+            textColor = '#ff0033';
+        }
+        
+        // Command the CSS variables
+        progressBarFill.style.setProperty('--progress-bar-color', barColor);
+        progressBarFill.style.setProperty('--progress-bar-shadow', barShadow);
+        progressPercentage.style.color = textColor;
+// --- NEW: Dynamic Color Calculation ---
+let percentageColor;
+if (progress < 25) {
+    percentageColor = 'rgba(255, 255, 255, 0.8)'; // Default white/gray
+} else if (progress >= 25 && progress <= 75) {
+    // Calculate progress within the 25-75 window (0.0 to 1.0)
+    const transitionProgress = (progress - 25) / 50;
+    // Interpolate hue from yellow (60) to red (0)
+    const hue = 60 - (transitionProgress * 60);
+    percentageColor = `hsl(${hue}, 100%, 70%)`;
+} else { // progress > 75
+    percentageColor = 'hsl(0, 100%, 70%)'; // Solid red
+}
+progressPercentage.style.color = percentageColor;
         const timeLeft = sprintEndTime - now.getTime();
 if (!adrenalinePhaseTriggered && timeLeft <= sprintInitialDuration * 0.25) {
             adrenalinePhaseTriggered = true;
@@ -419,8 +460,6 @@ clearTimeout(corruptionStartTimeout); // Purge the pending corruption start
                 triggerKineticFeedback(oldValue);
             }
         }
-        // --- NEW: Real-time rendering command for the Osmium Blade ---
-        if (document.pictureInPictureElement) drawOsmiumBlade();
     } else {
         switch (currentMode) {
             case 'home':
@@ -477,55 +516,9 @@ function toggleFullscreen() {
         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     }
 }
+
 function updateFullscreenIcon() { updateBodyClass(); }
-// --- INNOVATION: The Osmium Blade Rendering Engine ---
-function drawOsmiumBlade() {
-    // Set canvas dimensions
-    pipCanvas.width = 400;
-    pipCanvas.height = 225;
 
-    // Background
-    pipCtx.fillStyle = '#050507';
-    pipCtx.fillRect(0, 0, pipCanvas.width, pipCanvas.height);
-
-    // Task Name
-    pipCtx.font = '700 24px "ITC Kabel Std", sans-serif';
-    pipCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    pipCtx.textAlign = 'center';
-    pipCtx.fillText(currentTaskName, pipCanvas.width / 2, 60);
-
-    // Sprint Timer
-    pipCtx.font = '900 80px "ITC Kabel Std", sans-serif';
-    pipCtx.fillStyle = '#ffffff';
-    pipCtx.shadowColor = 'rgba(255, 255, 255, 0.5)';
-    pipCtx.shadowBlur = 15;
-    pipCtx.fillText(timeValueDisplay.textContent.replace('❖',':'), pipCanvas.width / 2, 150);
-    pipCtx.shadowBlur = 0; // Reset shadow
-
-    // "SPRINT" unit
-    pipCtx.font = '400 20px "ITC Kabel Std", sans-serif';
-    pipCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    // Manual positioning is required as text width varies
-    const timerWidth = pipCtx.measureText(timeValueDisplay.textContent).width;
-    pipCtx.textAlign = 'left';
-    pipCtx.fillText("SPRINT", (pipCanvas.width / 2) + (timerWidth / 1.5), 150);
-}
-
-// --- INNOVATION: The Osmium Blade Command Interface ---
-async function toggleOsmiumBlade() {
-    if (!isSprintActive) return; // Only available during a sprint
-
-    try {
-        if (document.pictureInPictureElement) {
-            await document.exitPictureInPicture();
-        } else {
-            drawOsmiumBlade(); // Initial draw before requesting
-            await pipCanvas.requestPictureInPicture();
-        }
-    } catch (error) {
-        console.error("Osmium Blade deployment failed:", error);
-    }
-}
 
 // --- AEGIS Command Functions ---
 function openDossier() {
@@ -609,7 +602,6 @@ async function initializeDashboard() {
     
 modeSwitches.forEach(sw => sw.addEventListener('change', () => setMode(sw.value)));
     fullscreenToggle.addEventListener('click', toggleFullscreen); // THIS LINE IS RESTORED
-    pipToggleButton.addEventListener('click', toggleOsmiumBlade);
     launchSprintButton.addEventListener('click', launchSprint);
     cancelSprintButton.addEventListener('click', () => endSprint('cancelled'));
     completeSprintButton.addEventListener('click', () => endSprint('completed'));
@@ -635,8 +627,6 @@ modeSwitches.forEach(sw => sw.addEventListener('change', () => setMode(sw.value)
     });
     document.addEventListener('fullscreenchange', updateFullscreenIcon);
     document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
-    pipCanvas.addEventListener('enterpictureinpicture', () => bodyElement.classList.add('pip-active'));
-    pipCanvas.addEventListener('leavepictureinpicture', () => bodyElement.classList.remove('pip-active'));
     document.addEventListener('keydown', handleHotkeys);
     // --- AEGIS Listeners ---
     logObjectiveButton.addEventListener('click', openDossier);
@@ -678,7 +668,19 @@ modeSwitches.forEach(sw => sw.addEventListener('change', () => setMode(sw.value)
 }
 
 // --- Activate All Systems ---
-masterInterval = setInterval(updateDisplay, 1000);
+
+let ancillaryInterval; // The interval for the secondary clock
+
+function startMasterIntervals() {
+    // Purge any existing intervals to prevent duplication
+    clearInterval(masterInterval);
+    clearInterval(ancillaryInterval);
+    
+    masterInterval = setInterval(updateDisplay, 1000);
+    ancillaryInterval = setInterval(updateRealtimeClock, 1000);
+}
+
+startMasterIntervals(); // Initial activation on load
 document.addEventListener('DOMContentLoaded', initializeDashboard);
 setInterval(updateRealtimeClock, 1000);
 
@@ -712,6 +714,7 @@ if ('serviceWorker' in navigator) {
         window.location.reload();
     });
 }
+
 
 
 
