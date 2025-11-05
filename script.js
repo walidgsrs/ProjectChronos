@@ -60,7 +60,6 @@ const sprintDurationInput = document.getElementById('sprint-duration-input');
 const launchSprintButton = document.getElementById('launch-sprint-button');
 const cancelSprintButton = document.getElementById('cancel-sprint-button');
 const completeSprintButton = document.getElementById('complete-sprint-button');
-const flowQuoteDisplay = document.getElementById('flow-quote-display');
 const starfieldContainer = document.getElementById('starfield-container');
 const postSprintOverlay = document.getElementById('post-sprint-overlay');
 const postSprintMessage = document.getElementById('post-sprint-message');
@@ -91,17 +90,38 @@ let currentMode = 'home';
 taskNameContainer.classList.remove('editing'); // Ensure editing mode is cancelled on sprint end
 let isSprintActive = false;
 let animationTimeout, rippleTimeout, masterInterval;
-let flowStateAnimationId, digitFlashTimeoutId, quoteInterval;
-let flashIndex = -1, quoteIndex = 0;
+let flowStateAnimationId, digitFlashTimeoutId;
+let flashIndex = -1;
 let sprintInitialDuration, sprintEndTime, adrenalinePhaseTriggered = false;
-// --- NEW: Celestial Corruption State ---
+// --- Celestial Command State ---
 let starElements = [];
-let corruptionInterval;
-let corruptionStartTimeout; // NEW: The temporal trigger for corruption
 let sprintGoal = 0;
 let sprintsCompleted = 0;
 let isDebriefingActive = false; // NEW: Gatekeeper for post-sprint feedback
 let currentTaskName = "Tactical Sprint";
+// --- NEW: The Debounce Engine for High-Velocity Command Buffering ---
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+// --- NEW: The Resize Handler ---
+const handleResize = debounce(() => {
+    if (isSprintActive) {
+        startWarpDrive(); // Re-forge the cosmos with the new dimensions
+    }
+}, 250); // 250ms delay is the optimal calibration
+// --- WARP DRIVE ENGINE STATE ---
+let warpCanvas, warpCtx;
+let stars = [];
+let warpAnimationId;
+let warpSpeed = 0; // The core velocity controller
 
 // --- Core State Machine ---
 function setMode(newMode) {
@@ -129,40 +149,6 @@ function updateBodyClass() {
     }
 }
 
-// --- INNOVATION: Celestial Starfield Engine ---
-function createStarfield(starCount = 170) { // Recalibrated: 55 stars for optimal performance
-    starElements = []; // Reset the star array
-    starfieldContainer.innerHTML = '';
-    // --- NEW: Define the celestial palette ---
-const starColors = ['blue-white', 'yellow', 'blue', 'white', 'yellow-white', 'orange'];
-
-    for (let i = 0; i < starCount; i++) {
-        const star = document.createElement('div');
-        star.classList.add('star');
-        
-        // --- NEW: Randomly assign a color class from the palette ---
-        const colorClass = starColors[Math.floor(Math.random() * starColors.length)];
-        star.classList.add(colorClass);
-        
-        const size = Math.random() * 1.5 + 0.5; // Re-calibrated: Stars between 0.5px and 2px
-        star.style.width = `${size}px`;
-        star.style.height = `${size}px`;
-        
-        star.style.top = `${Math.random() * 60}%`;
-        star.style.left = `${Math.random() * 100}%`;
-        
-        star.style.animationDuration = `${Math.random() * 5 + 3}s`;
-        star.style.animationDelay = `${Math.random() * 5}s`;
-        
-        starfieldContainer.appendChild(star);
-        starElements.push(star); // Add the forged star to our command list
-    }
-}
-
-function destroyStarfield() {
-    starfieldContainer.innerHTML = '';
-    starElements = []; // Purge the command list
-}
 
 // --- Flow State & Motivational Engines ---
 function updateFlowStateAesthetics() {
@@ -211,84 +197,218 @@ function stopDigitFlasher() {
     const flashedDigits = timeValueDisplay.querySelectorAll('.digit.flash');
     flashedDigits.forEach(d => d.classList.remove('flash'));
 }
-function startQuoteCycler() {
-    stopQuoteCycler();
-    displayNextQuote();
-    quoteInterval = setInterval(displayNextQuote, 30000);
+// --- WARP DRIVE PHYSICS ENGINE ---
+function setupWarpDrive() {
+    warpCanvas = document.getElementById('warp-drive-canvas');
+    if (!warpCanvas) return;
+    warpCtx = warpCanvas.getContext('2d');
+    
+    // Set canvas to full screen size
+    warpCanvas.width = window.innerWidth;
+    warpCanvas.height = window.innerHeight;
+
+    function Star() {
+        // --- RE-FORGED: The Annulus Protocol for a clean hyperspace lane ---
+        
+        // 1. Define the central void. This is the radius from the center where no stars will be generated.
+        const deadZoneRadius = Math.min(warpCanvas.width, warpCanvas.height) * 0.15;
+        
+        // 2. Define the maximum radius for star generation.
+        const maxRadius = Math.min(warpCanvas.width, warpCanvas.height) * 0.9;
+        
+        // 3. Generate a random angle and a random radius OUTSIDE the dead zone.
+        const angle = Math.random() * 2 * Math.PI;
+        const radius = Math.sqrt(Math.random()) * (maxRadius - deadZoneRadius) + deadZoneRadius;
+        // Using Math.sqrt on the random number ensures a more uniform distribution away from the center.
+
+        // 4. Convert the polar coordinates back to Cartesian to be used by the physics engine.
+        this.x = radius * Math.cos(angle);
+        this.y = radius * Math.sin(angle);
+        this.z = Math.random() * warpCanvas.width;
+        this.pz = this.z;
+        // --- RE-FORGED: The Desaturated Singularity Palette ---
+        const colors = [
+            'hsl(220, 100%, 95%)', // A brilliant, piercing blue-white
+            'hsl(60, 100%, 95%)',  // A brilliant, searing yellow-white
+            'hsl(30, 100%, 95%)',  // A subtle, distant orange-white
+            'hsl(0, 0%, 100%)'     // Pure, absolute white
+        ];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.speed = Math.random() * 0.2 + 0.1; // Each star has its own base velocity
+    }
+
+    // Generate the initial starfield
+    stars = [];
+    for (let i = 0; i < 400; i++) { // DENSITY AMPLIFIED
+        stars.push(new Star());
+    }
 }
-function stopQuoteCycler() {
-    clearInterval(quoteInterval);
-    flowQuoteDisplay.classList.remove('visible');
+
+function startWarpDrive() {
+    if (warpAnimationId) cancelAnimationFrame(warpAnimationId);
+    setupWarpDrive(); // Re-setup in case of window resize
+    renderWarpDrive();
 }
-function displayNextQuote() {
-    flowQuoteDisplay.classList.remove('visible');
-    setTimeout(() => {
-        quoteIndex = (quoteIndex + 1) % BRUNNIAN_QUOTES.length;
-        flowQuoteDisplay.textContent = BRUNNIAN_QUOTES[quoteIndex];
-        flowQuoteDisplay.classList.add('visible');
-    }, 1000);
+
+function stopWarpDrive() {
+    cancelAnimationFrame(warpAnimationId);
+    if (warpCtx) {
+        warpCtx.clearRect(0, 0, warpCanvas.width, warpCanvas.height);
+    }
+}
+
+function renderWarpDrive() {
+    if (!warpCtx) return;
+
+    const centerX = warpCanvas.width / 2;
+    const centerY = warpCanvas.height / 2;
+
+    // --- RE-FORGED: Weaken the Void for longer persistence ---
+    // The alpha value is reduced from 0.4 to 0.2, allowing trails to persist much longer.
+    warpCtx.fillStyle = 'rgba(5, 5, 7, 0.2)';
+    warpCtx.fillRect(0, 0, warpCanvas.width, warpCanvas.height);
+
+    for (let i = 0; i < stars.length; i++) {
+        const star = stars[i];
+
+        star.z -= star.speed * warpSpeed;
+
+        if (star.z <= 0) {
+            star.z = warpCanvas.width;
+            star.x = (Math.random() * warpCanvas.width * 1.5) - (warpCanvas.width * 1.5 / 2);
+            star.y = (Math.random() * warpCanvas.height * 1.5) - (warpCanvas.height * 1.5 / 2);
+        }
+
+        const k = 128 / star.z;
+        const sx = star.x * k + centerX;
+        const sy = star.y * k + centerY;
+
+        if (sx > 0 && sx < warpCanvas.width && sy > 0 && sy < warpCanvas.height) {
+            
+            let trailLengthFactor, trailWidth;
+
+            if (adrenalinePhaseTriggered) {
+                // --- RE-CALIBRATED: Berserker Charge with a Sharper Blade ---
+                trailLengthFactor = 20; // Length remains unchanged
+                trailWidth = 2.5;       // Thickness is recalibrated for precision
+            } else {
+                // --- RE-CALIBRATED: Flow State with a Sharper Blade ---
+                trailLengthFactor = 10; // Length remains unchanged
+                trailWidth = 1.5;       // Thickness is recalibrated for precision
+            }
+
+            const z_tail = star.z + star.speed * warpSpeed * trailLengthFactor;
+            const k_tail = 128 / z_tail;
+            const tail_x = star.x * k_tail + centerX;
+            const tail_y = star.y * k_tail + centerY;
+            
+            let trailColor;
+            if (adrenalinePhaseTriggered) {
+                const timeIntoAdrenaline = (sprintInitialDuration * 0.25) - (sprintEndTime - Date.now());
+                const transitionDuration = 1000;
+
+                if (timeIntoAdrenaline < transitionDuration) {
+                    const transitionProgress = timeIntoAdrenaline / transitionDuration;
+                    const r1 = 0, g1 = 188, b1 = 212;
+                    const r2 = 255, g2 = 150, b2 = 150;
+                    const r = Math.floor(r1 + (r2 - r1) * transitionProgress);
+                    const g = Math.floor(g1 + (g2 - g1) * transitionProgress);
+                    const b = Math.floor(b1 + (b2 - b1) * transitionProgress);
+                    trailColor = `rgb(${r}, ${g}, ${b})`;
+                } else {
+                    const progress = (sprintEndTime - Date.now()) / (sprintInitialDuration * 0.25);
+                    const corruption = 1 - Math.max(0, Math.min(1, progress));
+                    const red = 255;
+                    const green = Math.floor(150 * (1 - corruption));
+                    const blue = Math.floor(150 * (1 - corruption));
+                    trailColor = `rgb(${red}, ${green}, ${blue})`;
+                }
+            } else {
+                trailColor = star.color;
+            }
+
+            // --- RE-FORGED: The "Energy Stream" Rendering Protocol ---
+
+            // 1. Calibrate the Aura for Subliminal Effect
+            warpCtx.shadowBlur = 3;
+            warpCtx.shadowColor = trailColor;
+
+            // 2. Forge the Monolithic Energy Stream
+            warpCtx.lineWidth = (1 - (star.z / warpCanvas.width)) * trailWidth;
+            warpCtx.strokeStyle = trailColor;
+            warpCtx.lineCap = 'round';
+            warpCtx.beginPath();
+            warpCtx.moveTo(tail_x, tail_y);
+            warpCtx.lineTo(sx, sy);
+            warpCtx.stroke();
+
+            // 3. Purge the Shadow State
+            warpCtx.shadowBlur = 0;
+        }
+    }
+
+    warpAnimationId = requestAnimationFrame(renderWarpDrive);
 }
 
 // --- Sprint Engine ---
 function launchSprint() {
-    postSprintOverlay.classList.remove('visible'); // Ensure debriefing screen is hidden
+    postSprintOverlay.classList.remove('visible');
     const durationMinutes = parseInt(sprintDurationInput.value, 10);
-    if (isNaN(durationMinutes) || durationMinutes <= 0) return;
+    const minDuration = parseInt(sprintDurationInput.min, 10);
+    const maxDuration = parseInt(sprintDurationInput.max, 10);
+
+    if (isNaN(durationMinutes) || durationMinutes < minDuration || durationMinutes > maxDuration) {
+        // --- Execute Rejection Protocol ---
+        sprintDurationInput.classList.add('input-invalid');
+        return; // Abort mission
+    }
+
+    // --- CORRECTION: Seize command from the master clock ---
+    clearInterval(masterInterval);
+    clearInterval(ancillaryInterval); // Also halt the secondary clock
+
     sublimatedMacroValue.textContent = timeValueDisplay.textContent;
     sublimatedMacroUnit.textContent = timeUnitDisplay.textContent;
     sprintStartAudio.currentTime = 0;
     sprintStartAudio.play().catch(e => {});
-    // Set default task name for new sprint
+    
     currentTaskName = "Tactical Sprint";
     taskNameDisplay.textContent = currentTaskName;
-// Reset Momentum Bar
+
     progressBarFill.style.width = '0%';
     progressPercentage.style.left = '0%';
     progressPercentage.textContent = '0%';
+
     isSprintActive = true;
     sprintInitialDuration = durationMinutes * 60 * 1000;
     sprintEndTime = Date.now() + sprintInitialDuration;
     adrenalinePhaseTriggered = false;
+    
     updateBodyClass();
-startFlowStateAesthetics();
+    startFlowStateAesthetics();
     startDigitFlasher();
-    startQuoteCycler();
-    createStarfield();
+    startWarpDrive();
+    warpSpeed = 0.7; // RE-CALIBRATED: A more potent cruising velocity
 
-// --- RE-FORGED: The Delayed Corruption Protocol ---
-    if (corruptionInterval) clearInterval(corruptionInterval);
-    if (corruptionStartTimeout) clearTimeout(corruptionStartTimeout);
-
-    // 1. The corruption window is now between 25% and 75% of the sprint (a 50% window).
-    const corruptionWindow = sprintInitialDuration * 0.50;
-    const corruptionPeriod = corruptionWindow / (starElements.length || 1);
-    const corruptionDelay = sprintInitialDuration * 0.25; // The delay before corruption begins.
-    let starsToCorrupt = [...starElements];
-
-    // 2. Schedule the corruption sequence to begin after the delay.
-    corruptionStartTimeout = setTimeout(() => {
-        // 3. Once started, corrupt stars at the new, compressed cadence.
-        corruptionInterval = setInterval(() => {
-            if (starsToCorrupt.length > 0) {
-                const starToCorrupt = starsToCorrupt.shift();
-                starToCorrupt.classList.add('corrupted');
-            } else {
-                clearInterval(corruptionInterval);
-            }
-        }, corruptionPeriod);
-    }, corruptionDelay);
-
-    updateDisplay();
+    // --- CORRECTION: Initiate the sprint's own, sovereign heartbeat ---
+    sprintInterval = setInterval(updateDisplay, 1000);
+    updateDisplay(); // Execute immediately
+    // --- NEW: Activate the Resilience Protocol ---
+    window.addEventListener('resize', handleResize);
 }
 
 function endSprint(reason = 'timeout') {
     if (!isSprintActive) return;
+
+    // --- CORRECTION: Terminate the sprint's heartbeat absolutely ---
     isSprintActive = false;
-    masterInterval = setInterval(updateDisplay, 1000);
+    clearInterval(sprintInterval); // Purge the sprint's timer
     isDebriefingActive = true;
 
     // --- Debriefing Protocol ---
     let messageHTML = '';
+    // ... (switch statement remains the same) ...
     switch (reason) {
         case 'cancelled':
             cancelSprintAudio.currentTime = 0;
@@ -310,9 +430,10 @@ function endSprint(reason = 'timeout') {
 
     // --- Performance Ledger Logic ---
     let progressMessage = '';
+    // ... (progress logic remains the same) ...
     if ((reason === 'completed' || reason === 'timeout') && sprintInitialDuration >= 20 * 60 * 1000) {
         sprintsCompleted++;
-        saveStateToStorage(); // Correctly calls the restored persistence engine
+        saveStateToStorage();
         updateGoalDisplay();
         if (sprintGoal > 0) {
             const percentage = Math.round((sprintsCompleted / sprintGoal) * 100);
@@ -320,49 +441,78 @@ function endSprint(reason = 'timeout') {
         }
     }
     sprintProgressDisplay.textContent = progressMessage;
-
     postSprintMessage.innerHTML = messageHTML;
     postSprintOverlay.classList.add('visible');
 
+    // --- State Reversion Protocol ---
     setTimeout(() => {
         postSprintOverlay.classList.remove('visible');
-stopFlowStateAesthetics();
-    stopDigitFlasher();
-    stopQuoteCycler();
-    destroyStarfield(); // This now correctly handles the star array
-clearTimeout(corruptionStartTimeout); // Purge the pending corruption start
-    clearInterval(corruptionInterval); // Terminate the corruption protocol
-        flowQuoteDisplay.classList.remove('visible');
+        isDebriefingActive = false;
+
+        // Purge all sprint-specific systems
+        stopFlowStateAesthetics();
+        stopDigitFlasher();
+        warpSpeed = 0; // Disengage Warp Drive
+        stopWarpDrive();
+        // --- NEW: Deactivate the Resilience Protocol ---
+        window.removeEventListener('resize', handleResize);
         sublimatedMacroValue.textContent = '';
         sublimatedMacroUnit.textContent = '';
-        isDebriefingActive = false;
-        masterInterval = setInterval(updateDisplay, 1000);
+        
+        // --- CORRECTION: Restore the master clock ---
         updateBodyClass();
+        startMasterIntervals(); // Command the main system to re-ignite
         updateDisplay();
     }, 4500);
 }
-// --- Kinetic Feedback Core ---
+// --- RE-FORGED: The Dual-Mode Kinetic Feedback Core ---
 function triggerKineticFeedback(oldValue) {
     if (isDebriefingActive) return; // Mission abort if debriefing is active
-    timeValueDisplay.setAttribute('data-old-value', oldValue);
-    timeValueDisplay.classList.add('value-changed');
-    clearTimeout(animationTimeout);
-    animationTimeout = setTimeout(() => { timeValueDisplay.classList.remove('value-changed'); }, 3000);
-    rippleContainer.classList.add('ripple-active');
-    clearTimeout(rippleTimeout);
-    rippleTimeout = setTimeout(() => { rippleContainer.classList.remove('ripple-active'); }, 3000);
+
+    // --- Auditory Systems remain constant ---
     pulseAudio.currentTime = 0;
     pulseAudio.play().catch(e => {});
 
-    if (isSprintActive && !adrenalinePhaseTriggered) {
-        flowRippleAudio.currentTime = 0;
-        flowRippleAudio.play().catch(e => {});
-    } else if (currentMode === 'strategic') {
-        strategicRippleAudio.currentTime = 0;
-        strategicRippleAudio.play().catch(e => {});
+    if (isSprintActive) {
+        // --- SPRINT PROTOCOL: Internal Glow Pulse ---
+        timeValueDisplay.classList.add('glow-pulse');
+        clearTimeout(animationTimeout); // Use the existing timeout variable
+        animationTimeout = setTimeout(() => {
+            timeValueDisplay.classList.remove('glow-pulse');
+        }, 1000); // Animation duration is 1s
+
+        // Play the correct ripple sound
+        if (adrenalinePhaseTriggered) {
+            tacticalRippleAudio.currentTime = 0;
+            tacticalRippleAudio.play().catch(e => {});
+        } else {
+            flowRippleAudio.currentTime = 0;
+            flowRippleAudio.play().catch(e => {});
+        }
+
     } else {
-        tacticalRippleAudio.currentTime = 0;
-        tacticalRippleAudio.play().catch(e => {});
+        // --- STANDBY PROTOCOL: Golden Echo & External Shockwave ---
+        timeValueDisplay.setAttribute('data-old-value', oldValue);
+        timeValueDisplay.classList.add('value-changed'); // This triggers the color flash
+        clearTimeout(animationTimeout);
+        animationTimeout = setTimeout(() => {
+            timeValueDisplay.classList.remove('value-changed');
+        }, 3000);
+
+        rippleContainer.classList.add('ripple-active');
+        clearTimeout(rippleTimeout);
+        rippleTimeout = setTimeout(() => {
+            rippleContainer.classList.remove('ripple-active');
+        }, 3000);
+
+        // Play the correct ripple sound
+        if (currentMode === 'strategic') {
+            strategicRippleAudio.currentTime = 0;
+            strategicRippleAudio.play().catch(e => {});
+        } else {
+            tacticalRippleAudio.currentTime = 0;
+            tacticalRippleAudio.play().catch(e => {});
+        }
     }
 }
 
@@ -378,31 +528,34 @@ function updateDisplay() {
         let progress = (elapsedTime / sprintInitialDuration) * 100;
         progress = Math.min(100, Math.max(0, progress));
 
-        progressBarFill.style.width = `${progress}%`;
-        progressPercentage.style.left = `${progress}%`;
-        progressPercentage.textContent = `${Math.floor(progress)}%`;
+        const progressRemaining = 100 - progress;
 
-        // --- NEW: Multi-Stage Color Calculation ---
+        // Command the visual decay
+        progressBarFill.style.width = `${progressRemaining}%`;
+        progressPercentage.style.left = `${progressRemaining}%`;
+        progressPercentage.textContent = `${Math.floor(progressRemaining)}%`;
+
+        // --- NEW: Inverted Multi-Stage Color Calculation ---
         let barColor, barShadow, textColor;
 
-        if (progress < 25) {
-            // Stage 1: Purity
+        if (progressRemaining > 75) {
+            // Stage 1 (100%-76%): Purity / White
             barColor = '#ffffff';
             barShadow = '0 0 8px #ffffff, 0 0 16px rgba(255, 255, 255, 0.7)';
             textColor = 'rgba(255, 255, 255, 0.8)';
-        } else if (progress < 50) {
-            // Stage 2: Caution
-            barColor = '#FFD700'; // Gold/Yellow
+        } else if (progressRemaining > 50) {
+            // Stage 2 (75%-51%): Yellow
+            barColor = '#FFD700';
             barShadow = '0 0 8px #FFD700, 0 0 16px rgba(255, 215, 0, 0.7)';
             textColor = '#FFD700';
-        } else if (progress < 75) {
-            // Stage 3: Warning
-            barColor = '#ff9800'; // Orange
+        } else if (progressRemaining > 25) {
+            // Stage 3 (50%-26%): Orange
+            barColor = '#ff9800';
             barShadow = '0 0 10px #ff9800, 0 0 20px rgba(255, 152, 0, 0.7)';
             textColor = '#ff9800';
-        } else { // progress >= 75
-            // Stage 4: Urgency
-            barColor = '#ff0033'; // Adrenaline Red
+        } else { // progressRemaining <= 25
+            // Stage 4 (25%-0%): Red
+            barColor = '#ff0033';
             barShadow = '0 0 12px #ff0033, 0 0 25px rgba(255, 0, 51, 0.7)';
             textColor = '#ff0033';
         }
@@ -428,15 +581,9 @@ progressPercentage.style.color = percentageColor;
         const timeLeft = sprintEndTime - now.getTime();
 if (!adrenalinePhaseTriggered && timeLeft <= sprintInitialDuration * 0.25) {
             adrenalinePhaseTriggered = true;
-            stopFlowStateAesthetics();
+            // --- THE BERSERKER CHARGE ---
+            warpSpeed = 4.0; // RE-CALIBRATED: The final, overwhelming berserker charge
             stopDigitFlasher();
-            stopQuoteCycler();
-clearTimeout(corruptionStartTimeout); // Purge the pending corruption start
-            clearInterval(corruptionInterval); // Cease the gradual corruption
-
-            // --- NEW: The Adrenaline Climax - Corrupt all remaining stars instantly ---
-            starElements.forEach(star => star.classList.add('corrupted'));
-            
             updateBodyClass();
             adrenalineStartAudio.currentTime = 0;
             adrenalineStartAudio.play().catch(e => {});
@@ -601,8 +748,11 @@ async function initializeDashboard() {
     sublimatedTargetDate.textContent = targetText;
     
 modeSwitches.forEach(sw => sw.addEventListener('change', () => setMode(sw.value)));
-    fullscreenToggle.addEventListener('click', toggleFullscreen); // THIS LINE IS RESTORED
+    fullscreenToggle.addEventListener('click', toggleFullscreen);
     launchSprintButton.addEventListener('click', launchSprint);
+    // --- COMMAND LINKAGES RESTORED ---
+    cancelSprintButton.addEventListener('click', () => endSprint('cancelled'));
+    completeSprintButton.addEventListener('click', () => endSprint('completed'));
     cancelSprintButton.addEventListener('click', () => endSprint('cancelled'));
     completeSprintButton.addEventListener('click', () => endSprint('completed'));
     // --- NEW: Mission Designator Listeners ---
@@ -628,6 +778,10 @@ modeSwitches.forEach(sw => sw.addEventListener('change', () => setMode(sw.value)
     document.addEventListener('fullscreenchange', updateFullscreenIcon);
     document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
     document.addEventListener('keydown', handleHotkeys);
+    // --- Self-Purging Mechanism for Input Rejection ---
+    sprintDurationInput.addEventListener('animationend', () => {
+        sprintDurationInput.classList.remove('input-invalid');
+    });
     // --- AEGIS Listeners ---
     logObjectiveButton.addEventListener('click', openDossier);
     abortDossierButton.addEventListener('click', closeDossier);
@@ -714,11 +868,5 @@ if ('serviceWorker' in navigator) {
         window.location.reload();
     });
 }
-
-
-
-
-
-
 
 
